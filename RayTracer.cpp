@@ -9,6 +9,7 @@
 #include "Ray.h"
 #include "Scene.h"
 #include <QProgressDialog>
+#include "math.h"
 
 static RayTracer * instance = NULL;
 
@@ -43,10 +44,12 @@ QImage RayTracer::render (const Vec3Df & camPos,
                           unsigned int screenHeight) {
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     Scene * scene = Scene::getInstance ();
-    const BoundingBox & bbox = scene->getBoundingBox ();
+
+    /*const BoundingBox & bbox = scene->getBoundingBox ();
     const Vec3Df & minBb = bbox.getMin ();
     const Vec3Df & maxBb = bbox.getMax ();
-    const Vec3Df rangeBb = maxBb - minBb;
+    const Vec3Df rangeBb = maxBb - minBb;*/
+
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
     for (unsigned int i = 0; i < screenWidth; i++) {
@@ -65,18 +68,41 @@ QImage RayTracer::render (const Vec3Df & camPos,
             for (unsigned int k = 0; k < scene->getObjects().size (); k++) {
                 const Object & o = scene->getObjects()[k];
                 Ray ray (camPos-o.getTrans (), dir);
+                Mesh mesh = o.getMesh();
+
+
+
                 bool hasIntersection = ray.intersect (o.getBoundingBox (),
                                                       intersectionPoint);
-                if (hasIntersection) {
-                    float intersectionDistance = Vec3Df::squaredDistance (intersectionPoint + o.getTrans (),
-                                                                          camPos);
-                    if (intersectionDistance < smallestIntersectionDistance) {
-                        c = 255.f * ((intersectionPoint - minBb) / rangeBb);
-                        smallestIntersectionDistance = intersectionDistance;
+                if (hasIntersection == true){
+                    std::vector<Triangle> tabTriangle = mesh.getTriangles();
+                    std::vector<Vertex> vertices = mesh.getVertices();
+                    std::vector<Vec3Df> triangleNormals;
+                    mesh.computeTriangleNormals(triangleNormals);
+
+                    for(int i =0 ; i<tabTriangle.size() ; i++){
+                        Triangle triangle = tabTriangle[i];
+                        Vec3Df normal = triangleNormals[i];
+                        Vec3Df vertex1 (vertices[triangle.getVertex(0)].getPos());
+                        Vec3Df vertex2 (vertices[triangle.getVertex(1)].getPos());
+                        Vec3Df vertex3 (vertices[triangle.getVertex(2)].getPos());
+                        bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, intersectionPoint, normal);
+
+                        if (hasIntersection) {
+                            float intersectionDistance = Vec3Df::squaredDistance (intersectionPoint + o.getTrans (),
+                                                                                  camPos);
+                            if (intersectionDistance < smallestIntersectionDistance) {
+                                //c = 255.f * ((intersectionPoint - minBb) / rangeBb);
+                                for(int j=0 ; j<3 ; j++){
+                                    c[j] = int(floor(255.f*intersectionPoint[j]))%255;
+                                }
+                                smallestIntersectionDistance = intersectionDistance;
+                            }
+                        }
                     }
                 }
+                image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
             }
-            image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
         }
     }
     progressDialog.setValue (100);

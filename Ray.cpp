@@ -6,6 +6,7 @@
 // *********************************************************
 
 #include "Ray.h"
+#include "Triangle.h"
 
 using namespace std;
 
@@ -60,4 +61,37 @@ bool Ray::intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const
             intersectionPoint[i] = candidatePlane[i];
         }
     return (true);			
+}
+
+bool Ray::intersectTriangle(const Vec3Df & vertex1, const Vec3Df & vertex2, const Vec3Df & vertex3, Vec3Df & intersectionPoint , Vec3Df & triangleNormal){
+
+
+    Vec3Df e0=vertex2-vertex1;
+    Vec3Df e1=vertex3-vertex1;
+
+    Vec3Df q = Vec3Df::crossProduct(direction,e1);
+    float a = Vec3Df::dotProduct(e0,q);
+
+    if(Vec3Df::dotProduct(triangleNormal,direction)>=0 || a<0.01){
+        return false;
+    }
+    else{
+
+        Vec3Df s = (origin - vertex1)/a;
+        Vec3Df r = Vec3Df::crossProduct(s,e0);
+        float b0 = Vec3Df::dotProduct(s,q);
+        float b1 = Vec3Df::dotProduct(r,direction);
+        float b2 = 1 - b0 - b1;
+        if(b0<0 || b1<0 || b2<0){
+
+            return false;
+        }
+        else{
+            intersectionPoint=b0*vertex1+b1*vertex2+b2*vertex3;
+            return true;
+        }
+    }
+
+
+
 }

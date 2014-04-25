@@ -13,6 +13,7 @@
 
 #include "Vec3D.h"
 #include "BoundingBox.h"
+#include "Triangle.h"
 
 class Ray {
 public:
@@ -27,6 +28,7 @@ public:
     inline Vec3Df & getDirection () { return direction; }
 
     bool intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const;
+    bool intersectTriangle(const Vec3Df & vertex1, const Vec3Df & vertex2, const Vec3Df & vertex3, Vec3Df & intersectionPoint , Vec3Df & triangleNormal);
     
 private:
     Vec3Df origin;
