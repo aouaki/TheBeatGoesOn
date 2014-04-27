@@ -70,39 +70,40 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 Ray ray (camPos-o.getTrans (), dir);
                 Mesh mesh = o.getMesh();
 
-
-
-                bool hasIntersection = ray.intersect (o.getBoundingBox (),
-                                                      intersectionPoint);
+                bool hasIntersection = ray.intersect (o.getBoundingBox (), intersectionPoint);
                 if (hasIntersection == true){
                     std::vector<Triangle> tabTriangle = mesh.getTriangles();
                     std::vector<Vertex> vertices = mesh.getVertices();
                     std::vector<Vec3Df> triangleNormals;
                     mesh.computeTriangleNormals(triangleNormals);
 
-                    for(int i =0 ; i<tabTriangle.size() ; i++){
-                        Triangle triangle = tabTriangle[i];
-                        Vec3Df normal = triangleNormals[i];
+                    for(unsigned int m =0 ; m<tabTriangle.size() ; m++){
+                        Triangle triangle = tabTriangle[m];
+                        Vec3Df normal = triangleNormals[m];
                         Vec3Df vertex1 (vertices[triangle.getVertex(0)].getPos());
                         Vec3Df vertex2 (vertices[triangle.getVertex(1)].getPos());
                         Vec3Df vertex3 (vertices[triangle.getVertex(2)].getPos());
                         bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, intersectionPoint, normal);
 
                         if (hasIntersection) {
-                            float intersectionDistance = Vec3Df::squaredDistance (intersectionPoint + o.getTrans (),
-                                                                                  camPos);
+                            float intersectionDistance = Vec3Df::squaredDistance (intersectionPoint + o.getTrans(), camPos);
                             if (intersectionDistance < smallestIntersectionDistance) {
                                 //c = 255.f * ((intersectionPoint - minBb) / rangeBb);
-                                for(int j=0 ; j<3 ; j++){
-                                    c[j] = int(floor(255.f*intersectionPoint[j]))%255;
+                                for(int l=0 ; l<3 ; l++){
+                                    if (k==0){
+                                        c[l] = 100;
+                                    }
+                                    else if (k==1){
+                                        c[l] = 200;
+                                    }
                                 }
                                 smallestIntersectionDistance = intersectionDistance;
                             }
                         }
                     }
                 }
-                image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
             }
+            image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
         }
     }
     progressDialog.setValue (100);
