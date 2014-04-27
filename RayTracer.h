@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <QImage>
+#include "Object.h"
 
 #include "Vec3D.h"
 
@@ -30,6 +31,10 @@ public:
                    float aspectRatio,
                    unsigned int screenWidth,
                    unsigned int screenHeight);
+
+    Vec3Df calcBrdf(const Vec3Df & direction,
+                               const Vec3Df & normal,
+                               const Object object);
     
 protected:
     inline RayTracer () {}

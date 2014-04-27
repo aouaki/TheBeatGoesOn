@@ -31,6 +31,7 @@ inline int clamp (float f, int inf, int sup) {
     return (v < inf ? inf : (v > sup ? sup : v));
 }
 
+
 // POINT D'ENTREE DU PROJET.
 // Le code suivant ray trace uniquement la boite englobante de la scene.
 // Il faut remplacer ce code par une veritable raytracer
@@ -67,11 +68,11 @@ QImage RayTracer::render (const Vec3Df & camPos,
             Vec3Df c (backgroundColor);
             for (unsigned int k = 0; k < scene->getObjects().size (); k++) {
                 const Object & o = scene->getObjects()[k];
+                //std::cout << o.getTrans()
                 Ray ray (camPos-o.getTrans (), dir);
-                Mesh mesh = o.getMesh();
-
                 bool hasIntersection = ray.intersect (o.getBoundingBox (), intersectionPoint);
-                if (hasIntersection == true){
+                if (hasIntersection){
+                    Mesh mesh = o.getMesh();
                     std::vector<Triangle> tabTriangle = mesh.getTriangles();
                     std::vector<Vertex> vertices = mesh.getVertices();
                     std::vector<Vec3Df> triangleNormals;
@@ -88,15 +89,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                         if (hasIntersection) {
                             float intersectionDistance = Vec3Df::squaredDistance (intersectionPoint + o.getTrans(), camPos);
                             if (intersectionDistance < smallestIntersectionDistance) {
-                                //c = 255.f * ((intersectionPoint - minBb) / rangeBb);
-                                for(int l=0 ; l<3 ; l++){
-                                    if (k==0){
-                                        c[l] = 100;
-                                    }
-                                    else if (k==1){
-                                        c[l] = 200;
-                                    }
-                                }
+                                c = calcBrdf(direction, normal, o);
                                 smallestIntersectionDistance = intersectionDistance;
                             }
                         }
@@ -108,4 +101,32 @@ QImage RayTracer::render (const Vec3Df & camPos,
     }
     progressDialog.setValue (100);
     return image;
+}
+
+Vec3Df RayTracer::calcBrdf(const Vec3Df & direction,
+                           const Vec3Df & normal,
+                           const Object object){
+
+    Scene * scene = Scene::getInstance ();
+    std::vector<Light> lights = scene->getLights();
+    Light light = lights[0];
+    Vec3Df n = normal;
+    n.normalize();
+    Vec3Df l = light.getPos() - direction;
+    Vec3Df v = - direction;
+    v.normalize();
+    Vec3Df r = 2*(Vec3Df::dotProduct(v,n))*n-v;
+    float diffuse = Vec3Df::dotProduct(l, n);
+    float shininess = 2;
+    float spec = pow(Vec3Df::dotProduct(r,v),shininess);
+    spec = std::max(spec,0.f);
+    diffuse = std::max(diffuse,0.f);
+    Vec3Df lightColor = light.getColor();
+    Material material = object.getMaterial();
+    float matDiffuse = material.getDiffuse();
+    float matSpecular = material.getSpecular();
+    Vec3Df matDiffuseColor = material.getColor();
+    Vec3Df matSpecularColor = material.getColor();
+    return ((matDiffuse * diffuse * matDiffuseColor + matSpecular * spec * matSpecularColor) * lightColor)*255;
+
 }
