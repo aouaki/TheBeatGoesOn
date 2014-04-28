@@ -32,10 +32,6 @@ public:
                    unsigned int screenWidth,
                    unsigned int screenHeight);
 
-    Vec3Df calcBrdf(const Vec3Df & direction,
-                               const Vec3Df & normal,
-                               const Object object);
-    
 protected:
     inline RayTracer () {}
     inline virtual ~RayTracer () {}
