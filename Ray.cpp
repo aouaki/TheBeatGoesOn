@@ -64,7 +64,7 @@ bool Ray::intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const
     return (true);			
 }
 
-bool Ray::intersectTriangle(const Vec3Df & vertex1, const Vec3Df & vertex2, const Vec3Df & vertex3, Vec3Df & intersectionPoint , Vec3Df & triangleNormal){
+bool Ray::intersectTriangle(const Vec3Df & vertex1, const Vec3Df & vertex2, const Vec3Df & vertex3, Vec3Df & triangleNormal, float intersectionDistance){
 
 
     Vec3Df e0=vertex2-vertex1;
@@ -90,7 +90,10 @@ bool Ray::intersectTriangle(const Vec3Df & vertex1, const Vec3Df & vertex2, cons
         }
 
         else{
-            intersectionPoint=b0*vertex1+b1*vertex2+b2*vertex3;
+            intersectionDistance = Vec3Df::dotProduct(e1,r);
+            if (intersectionDistance == 0.f){
+                std::cout << "lol" << std::endl;
+            }
             return true;
         }
     }
