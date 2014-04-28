@@ -86,7 +86,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                         bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, intersectionPoint, normal);
 
                         if (hasIntersection) {
-                            float intersectionDistance = Vec3Df::squaredDistance (intersectionPoint + o.getTrans(), camPos);
+                            float intersectionDistance = Vec3Df::squaredDistance (intersectionPoint /*+ o.getTrans()*/, camPos-o.getTrans());
                             if (intersectionDistance < smallestIntersectionDistance) {
                                 //c = 255.f * ((intersectionPoint - minBb) / rangeBb);
                                 for(int l=0 ; l<3 ; l++){

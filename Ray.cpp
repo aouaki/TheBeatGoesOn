@@ -7,7 +7,7 @@
 
 #include "Ray.h"
 #include "Triangle.h"
-#define EPSILON 1e-8
+#define EPSILON 10e-6
 
 using namespace std;
 
@@ -84,12 +84,14 @@ bool Ray::intersectTriangle(const Vec3Df & vertex1, const Vec3Df & vertex2, cons
             float b0 = Vec3Df::dotProduct(s,q);
             float b1 = Vec3Df::dotProduct(r,direction);
             float b2 = 1 - b0 - b1;
+
             if(b0<0 || b1<0 || b2<0){
 
                 return false;
-        }
+            }
 
-        else{
+            else
+            {
             intersectionPoint=b0*vertex1+b1*vertex2+b2*vertex3;
             return true;
         }
