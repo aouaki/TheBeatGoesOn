@@ -51,6 +51,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
     const Vec3Df & maxBb = bbox.getMax ();
     const Vec3Df rangeBb = maxBb - minBb;*/
 
+
+
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
     for (unsigned int i = 0; i < screenWidth; i++) {
@@ -85,11 +87,21 @@ QImage RayTracer::render (const Vec3Df & camPos,
                         Vec3Df vertex2 (vertices[triangle.getVertex(1)].getPos());
                         Vec3Df vertex3 (vertices[triangle.getVertex(2)].getPos());
                         float intersectionDistance;
-                        bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, intersectionDistance);
+                        float coefB[3]; //The three barycentric coefs of the intersection point
+                        bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, coefB, intersectionDistance);
 
                         if (hasIntersection) {
                             if (intersectionDistance < smallestIntersectionDistance) {
-                                c = calcBrdf(direction, normal, o);
+
+                                Vec3Df IntersPointNormal =
+                                        vertices[triangle.getVertex(0)].getNormal()*coefB[2]
+                                        +vertices[triangle.getVertex(1)].getNormal()*coefB[0]
+                                        +vertices[triangle.getVertex(2)].getNormal()*coefB[1];
+                                IntersPointNormal = IntersPointNormal/(coefB[0]+coefB[1]+coefB[2]);
+
+
+
+                                c = calcBrdf(direction, IntersPointNormal, o);
                                 smallestIntersectionDistance = intersectionDistance;
                             }
                         }

@@ -64,7 +64,7 @@ bool Ray::intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const
     return (true);			
 }
 
-bool Ray::intersectTriangle(const Vec3Df & vertex1, const Vec3Df & vertex2, const Vec3Df & vertex3, Vec3Df & triangleNormal, float intersectionDistance){
+bool Ray::intersectTriangle(const Vec3Df & vertex1, const Vec3Df & vertex2, const Vec3Df & vertex3, Vec3Df & triangleNormal, float coefB[], float & intersectionDistance){
 
 
     Vec3Df e0=vertex2-vertex1;
@@ -73,28 +73,21 @@ bool Ray::intersectTriangle(const Vec3Df & vertex1, const Vec3Df & vertex2, cons
     Vec3Df q = Vec3Df::crossProduct(direction,e1);
     float a = Vec3Df::dotProduct(e0,q);
 
-    if(Vec3Df::dotProduct(triangleNormal,direction)>=0 || a<EPSILON){
+    if(Vec3Df::dotProduct(triangleNormal,direction)>=0 || a<EPSILON)
         return false;
-    }
 
-    else{
+    Vec3Df s = (origin - vertex1)/a;
+    Vec3Df r = Vec3Df::crossProduct(s,e0);
+    coefB[0] = Vec3Df::dotProduct(s,q);
+    coefB[1] = Vec3Df::dotProduct(r,direction);
+    coefB[2] = 1 - coefB[0] - coefB[1];
 
-            Vec3Df s = (origin - vertex1)/a;
-            Vec3Df r = Vec3Df::crossProduct(s,e0);
-            float b0 = Vec3Df::dotProduct(s,q);
-            float b1 = Vec3Df::dotProduct(r,direction);
-            float b2 = 1 - b0 - b1;
+    if(coefB[0]<0 || coefB[1]<0 || coefB[2]<0)
+        return false;
 
-            if(b0<0 || b1<0 || b2<0){
-                return false;
-            }
+    intersectionDistance = Vec3Df::dotProduct(e1,r);
+    if (intersectionDistance>=0)
+        return true;
+    else return false;
 
-        else{
-            intersectionDistance = Vec3Df::dotProduct(e1,r);
-            if (intersectionDistance == 0.f){
-                std::cout << "lol" << std::endl;
-            }
-            return true;
-        }
-    }
 }
