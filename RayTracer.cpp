@@ -31,34 +31,39 @@ inline int clamp (float f, int inf, int sup) {
     return (v < inf ? inf : (v > sup ? sup : v));
 }
 
-Vec3Df Brdf(const Vec3Df & direction,
+Vec3Df Brdf(const Vec3Df & camPos,
                            const Vec3Df & normal,
                            const Object object,
                            const Vec3Df & intersectionPoint){
 
     Scene * scene = Scene::getInstance ();
     std::vector<Light> lights = scene->getLights();
-    Light light = lights[0];
-    Vec3Df n = normal;
-    n.normalize();
-    Vec3Df wi = light.getPos() - intersectionPoint;
-    wi.normalize();
-    Vec3Df w0 = - direction;
-    w0.normalize();
-    Vec3Df r = 2*(Vec3Df::dotProduct(wi,n))*n-wi;
-    float diffuse = Vec3Df::dotProduct(wi, n);
-    float shininess = 2;
-    float spec = pow(Vec3Df::dotProduct(r,w0),shininess);
-    spec = std::max(spec,0.f);
-    diffuse = std::max(diffuse,0.f);
-    Vec3Df lightColor = light.getColor();
-    Material material = object.getMaterial();
-    float matDiffuse = material.getDiffuse();
-    float matSpecular = material.getSpecular();
-    Vec3Df matDiffuseColor = material.getColor();
-    Vec3Df matSpecularColor = material.getColor();
-    return ((matDiffuse * diffuse * matDiffuseColor + matSpecular * spec * matSpecularColor) * lightColor)*255;
+    Vec3Df ci = NULL;
+    for(int i =0;i<lights.size();i++)
+    {
+        Light light = lights[i];
+        Vec3Df n = normal;
+        n.normalize();
+        Vec3Df wi = light.getPos() - intersectionPoint;
+        wi.normalize();
+        Vec3Df w0 = (camPos-intersectionPoint);
+        w0.normalize();
+        Vec3Df r = 2*(Vec3Df::dotProduct(wi,n))*n-wi;
+        r.normalize();
+        float diffuse = Vec3Df::dotProduct(wi, n);
+        float shininess = 11;
+        float spec = pow(std::max(Vec3Df::dotProduct(r,w0),0.f),shininess);
+        diffuse = std::max(diffuse,0.0f);
+        Vec3Df lightColor = light.getColor();
+        Material material = object.getMaterial();
+        float matDiffuse = material.getDiffuse();
+        float matSpecular = material.getSpecular();
+        Vec3Df matDiffuseColor = material.getColor();
+        Vec3Df matSpecularColor = material.getColor();
 
+        ci += ((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5)*lightColor)*255;
+    }
+    return ci;
 }
 
 
@@ -75,6 +80,10 @@ QImage RayTracer::render (const Vec3Df & camPos,
                           unsigned int screenHeight) {
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     Scene * scene = Scene::getInstance ();
+    std::vector<Light> lights = scene->getLights();
+    Light light = lights[0];
+
+    std::cout << "Couleur de la lumiere : " << light.getColor() << std::endl;
 
     /*const BoundingBox & bbox = scene->getBoundingBox ();
     const Vec3Df & minBb = bbox.getMin ();
@@ -138,7 +147,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                                 IntersPoint = IntersPoint/(coefB[0]+coefB[1]+coefB[2]);
 
 
-                                c = Brdf(dir, IntersPointNormal, o,intersectionPoint);
+                                c = Brdf(camPos, IntersPointNormal, o,intersectionPoint);
                                 smallestIntersectionDistance = intersectionDistance;
                             }
                         }
