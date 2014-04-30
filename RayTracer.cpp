@@ -38,8 +38,8 @@ Vec3Df Brdf(const Vec3Df & camPos,
 
     Scene * scene = Scene::getInstance ();
     std::vector<Light> lights = scene->getLights();
-    Vec3Df ci = NULL;
-    for(int i =0;i<lights.size();i++)
+    Vec3Df ci;
+    for(unsigned int i =0;i<lights.size();i++)
     {
         Light light = lights[i];
         Vec3Df n = normal;
