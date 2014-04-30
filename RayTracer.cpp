@@ -107,7 +107,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
             float tanY = tan (fieldOfView);
 
             //Nombre de découpe par dimension du pixel (Antialiasing)
-            int aliaNb = 1;
+            int aliaNb = 2;
             aliaNb++;
 
             Vec3Df c (backgroundColor);
@@ -167,7 +167,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                         }
                     }
 
-                    tempc += Brdf(camPos, IntersPointNormal, o,intersectionPoint)*0.25;
+                    tempc += Brdf(camPos, IntersPointNormal, o,intersectionPoint)/std::pow(aliaNb-1,2);
                     c=tempc;
                 }
             }
