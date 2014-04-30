@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <QImage>
+#include "Object.h"
 
 #include "Vec3D.h"
 
@@ -30,7 +31,7 @@ public:
                    float aspectRatio,
                    unsigned int screenWidth,
                    unsigned int screenHeight);
-    
+
 protected:
     inline RayTracer () {}
     inline virtual ~RayTracer () {}
