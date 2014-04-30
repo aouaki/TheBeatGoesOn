@@ -107,15 +107,15 @@ QImage RayTracer::render (const Vec3Df & camPos,
             float tanY = tan (fieldOfView);
 
             //Nombre de découpe par dimension du pixel (Antialiasing)
-            int aliaNb = 2;
+            int aliaNb = 4;
             aliaNb++;
 
             Vec3Df c (backgroundColor);
             Vec3Df tempc;
             for(int pixi=1; pixi<aliaNb; pixi++){
                 for(int pixj=1; pixj<aliaNb; pixj++){
-                    Vec3Df stepX = (float (i)-0.5+pixi/aliaNb - screenWidth/2.f)/screenWidth * tanX * rightVector;
-                    Vec3Df stepY = (float (j)-0.5+pixj/aliaNb - screenHeight/2.f)/screenHeight * tanY * upVector;
+                    Vec3Df stepX = (float (i)-0.5+float(pixi)/float(aliaNb) - screenWidth/2.f)/screenWidth * tanX * rightVector;
+                    Vec3Df stepY = (float (j)-0.5+float(pixj)/float(aliaNb) - screenHeight/2.f)/screenHeight * tanY * upVector;
                     Vec3Df step = stepX + stepY;
 
                     Vec3Df dir = direction + step;
