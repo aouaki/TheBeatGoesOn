@@ -6,10 +6,9 @@
 // *********************************************************
 
 #include "RayTracer.h"
-#include "Ray.h"
-#include "Scene.h"
 #include <QProgressDialog>
 #include "math.h"
+#include "TriBox.h"
 
 static RayTracer * instance = NULL;
 
@@ -31,6 +30,61 @@ inline int clamp (float f, int inf, int sup) {
     return (v < inf ? inf : (v > sup ? sup : v));
 }
 
+inline bool RayTracer::runKdTree(const KDNode *tree, float & smallestIntersectionDistance, Vec3Df & intersectionPoint, Vec3Df & c, Ray & ray, Mesh & mesh, unsigned int & k){
+
+    bool hasIntersection = ray.intersect(tree->bbox, intersectionPoint);
+    if (hasIntersection){
+        if ( tree->isNotLeaf() ) {
+            if (tree->getLeftChild()->bbox.contains(intersectionPoint)) {
+                if (runKdTree(tree->getLeftChild(), smallestIntersectionDistance, intersectionPoint, c, ray, mesh, k) == false) {
+                    runKdTree(tree->getRightChild(), smallestIntersectionDistance, intersectionPoint, c, ray, mesh, k);
+                }
+            }
+            else {
+                if (runKdTree(tree->getRightChild(), smallestIntersectionDistance, intersectionPoint, c, ray, mesh, k) == false) {
+                    runKdTree(tree->getLeftChild(), smallestIntersectionDistance, intersectionPoint, c, ray, mesh, k);
+                }
+            }
+        }
+        else {
+            const std::vector <Triangle> & meshTriangles = mesh.getTriangles();
+            const std::vector <Vertex> vertices = mesh.getVertices();
+            for (unsigned nbTri = 0; nbTri < tree->getTriangles().size(); nbTri++) {
+                unsigned idTri = tree->getTriangles()[nbTri];
+                const Triangle & triangle = meshTriangles[idTri];
+                const Vec3Df & vertex1 = vertices [triangle.getVertex(0)].getPos();
+                const Vec3Df & vertex2 = vertices [triangle.getVertex(1)].getPos();
+                const Vec3Df & vertex3 = vertices [triangle.getVertex(2)].getPos();
+                std::vector<Vec3Df> triangleNormals;
+                mesh.computeTriangleNormals(triangleNormals);
+                Vec3Df normal = triangleNormals[idTri];
+                float intersectionDistance;
+                bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, intersectionDistance);
+
+                if (hasIntersection) {
+                    if (intersectionDistance < smallestIntersectionDistance) {
+                        for(int l=0 ; l<3 ; l++){
+                            if (k==0){
+                                c[l] = 100;
+                            }
+                            else if (k==1){
+                                c[l] = 200;
+                            }
+                        }
+                        return true;
+                        smallestIntersectionDistance = intersectionDistance;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        return false;
+    }
+    return false;
+}
+
 // POINT D'ENTREE DU PROJET.
 // Le code suivant ray trace uniquement la boite englobante de la scene.
 // Il faut remplacer ce code par une veritable raytracer
@@ -44,11 +98,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
                           unsigned int screenHeight) {
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     Scene * scene = Scene::getInstance ();
-
-    /*const BoundingBox & bbox = scene->getBoundingBox ();
-    const Vec3Df & minBb = bbox.getMin ();
-    const Vec3Df & maxBb = bbox.getMax ();
-    const Vec3Df rangeBb = maxBb - minBb;*/
 
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
@@ -69,39 +118,59 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 const Object & o = scene->getObjects()[k];
                 Ray ray (camPos-o.getTrans (), dir);
                 Mesh mesh = o.getMesh();
-
+                runKdTree(o.getTree(), smallestIntersectionDistance, intersectionPoint, c, ray, mesh, k);
+                /*
+                BoundingBox bbox = o.getBoundingBox();
                 bool hasIntersection = ray.intersect (o.getBoundingBox (), intersectionPoint);
                 if (hasIntersection == true){
-                    std::vector<Triangle> tabTriangle = mesh.getTriangles();
-                    std::vector<Vertex> vertices = mesh.getVertices();
-                    std::vector<Vec3Df> triangleNormals;
-                    mesh.computeTriangleNormals(triangleNormals);
+                    BoundingBox bbox = o.getBoundingBox();
+                    for (unsigned int p = 0; p<8; p++){
+                        hasIntersection = ray.intersect(bbox.getSons()[p], intersectionPoint);
+                        BoundingBox sonBox = bbox.getSons()[p];
+                        if (hasIntersection){
+                            BoundingBox sonBox = bbox.getSons()[p];
+                            std::vector<Triangle> tabTriangle = mesh.getTriangles();
+                            std::vector<Vertex> vertices = mesh.getVertices();
+                            std::vector<Vec3Df> triangleNormals;
+                            mesh.computeTriangleNormals(triangleNormals);
 
-                    for(unsigned int m =0 ; m<tabTriangle.size() ; m++){
-                        Triangle triangle = tabTriangle[m];
-                        Vec3Df normal = triangleNormals[m];
-                        Vec3Df vertex1 (vertices[triangle.getVertex(0)].getPos());
-                        Vec3Df vertex2 (vertices[triangle.getVertex(1)].getPos());
-                        Vec3Df vertex3 (vertices[triangle.getVertex(2)].getPos());
-                        float intersectionDistance;
-                        bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, intersectionDistance);
+                            for(unsigned int m =0 ; m<tabTriangle.size() ; m++){
+                                Triangle triangle = tabTriangle[m];
+                                Vec3Df normal = triangleNormals[m];
+                                Vec3Df vertex1 (vertices[triangle.getVertex(0)].getPos());
+                                Vec3Df vertex2 (vertices[triangle.getVertex(1)].getPos());
+                                Vec3Df vertex3 (vertices[triangle.getVertex(2)].getPos());
+                                //boxcenter,Vec3Df boxhalfsize,Vec3Df triverts
+                                Vec3Df boxHalfSize (sonBox.getWidth()/2, sonBox.getHeight()/2, sonBox.getLength()/2);
+                                std::vector<Vec3Df> triangleVertices;
+                                triangleVertices.resize(3);
+                                triangleVertices[0]=vertex1;
+                                triangleVertices[1]=vertex2;
+                                triangleVertices[2]=vertex3;
+                                if (triBoxOverlap(sonBox.getCenter(), boxHalfSize, triangleVertices)){
+                                    float intersectionDistance;
+                                    bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, intersectionDistance);
 
-                        if (hasIntersection) {
-                            if (intersectionDistance < smallestIntersectionDistance) {
-                                //c = 255.f * ((intersectionPoint - minBb) / rangeBb);
-                                for(int l=0 ; l<3 ; l++){
-                                    if (k==0){
-                                        c[l] = 100;
-                                    }
-                                    else if (k==1){
-                                        c[l] = 200;
+                                    if (hasIntersection) {
+                                        if (intersectionDistance < smallestIntersectionDistance) {
+                                            //c = 255.f * ((intersectionPoint - minBb) / rangeBb);
+                                            for(int l=0 ; l<3 ; l++){
+                                                if (k==0){
+                                                    c[l] = 100;
+                                                }
+                                                else if (k==1){
+                                                    c[l] = 200;
+                                                }
+                                            }
+                                            smallestIntersectionDistance = intersectionDistance;
+                                        }
                                     }
                                 }
-                                smallestIntersectionDistance = intersectionDistance;
                             }
                         }
                     }
                 }
+                */
             }
             image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
         }
@@ -109,3 +178,4 @@ QImage RayTracer::render (const Vec3Df & camPos,
     progressDialog.setValue (100);
     return image;
 }
+

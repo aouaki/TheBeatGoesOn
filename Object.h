@@ -14,12 +14,14 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "BoundingBox.h"
+#include "Kdnode.h"
 
 class Object {
 public:
     inline Object () {}
     inline Object (const Mesh & mesh, const Material & mat) : mesh (mesh), mat (mat) {
         updateBoundingBox ();
+        tree = new KDNode(*this);
     }
     virtual ~Object () {}
 
@@ -34,12 +36,15 @@ public:
 
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
+
+    inline const KDNode * getTree () const { return tree;}
     
 private:
     Mesh mesh;
     Material mat;
     BoundingBox bbox;
     Vec3Df trans;
+    KDNode *tree;
 };
 
 

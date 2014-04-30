@@ -13,6 +13,8 @@
 #include <QImage>
 
 #include "Vec3D.h"
+#include "Ray.h"
+#include "Scene.h"
 
 class RayTracer {
 public:
@@ -21,7 +23,10 @@ public:
 
     inline const Vec3Df & getBackgroundColor () const { return backgroundColor;}
     inline void setBackgroundColor (const Vec3Df & c) { backgroundColor = c; }
-    
+
+    inline bool runKdTree(const KDNode *tree, float & smallestIntersectionDistance, Vec3Df & intersectionPoint, Vec3Df & c, Ray & ray, Mesh & mesh, unsigned int & k);
+    inline bool searchLeaf(const KDNode *&tree, float & smallestIntersectionDistance, Vec3Df & c, Ray & ray, Mesh & mesh, unsigned int & k);
+
     QImage render (const Vec3Df & camPos,
                    const Vec3Df & viewDirection,
                    const Vec3Df & upVector,
@@ -30,7 +35,8 @@ public:
                    float aspectRatio,
                    unsigned int screenWidth,
                    unsigned int screenHeight);
-    
+
+
 protected:
     inline RayTracer () {}
     inline virtual ~RayTracer () {}

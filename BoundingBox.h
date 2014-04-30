@@ -53,6 +53,12 @@ public:
     inline void init (float x, float y, float z) {
         init (Vec3Df (x, y, z));
     }
+    inline std::vector<BoundingBox> getSons() const {
+        return sonBoxes;
+    }
+    inline BoundingBox getSon(unsigned int i) const {
+        return sonBoxes[i];
+    }
     inline float getWidth () const {
         return (maxBb[0] - minBb[0]);
     }
@@ -61,6 +67,12 @@ public:
     }
     inline float getLength () const {
         return (maxBb[2] - minBb[2]);
+    }
+    inline int getMaxAxis () const {
+        float maxDim = std::max(std::max(getWidth(), getHeight()), getLength());
+        if (maxDim == getWidth()) {return 0;}
+        else if (maxDim == getHeight()) {return 1;}
+        else {return 2;}
     }
     inline float getSize () const {
         return std::max (getWidth (), std::max (getHeight (), getLength ()));
@@ -118,21 +130,31 @@ public:
     inline const Vec3Df & getMax () const {
         return maxBb;
     }
-    inline void subdivide (std::vector<BoundingBox> & splitBoundingBoxArray) const {
+    inline void subdivide () {
         Vec3Df med = (minBb + maxBb) / 2;
         float x_2 = (maxBb[0] - minBb [0]) / 2;
         float y_2 = (maxBb[1] - minBb [1]) / 2;
         float z_2 = (maxBb[2] - minBb [2]) / 2;
-        splitBoundingBoxArray.resize (8);
-        splitBoundingBoxArray[0] = BoundingBox (minBb, med);
-        splitBoundingBoxArray[1] = BoundingBox (minBb + Vec3Df (x_2, 0.0, 0.0), med + Vec3Df (x_2, 0.0, 0.0));
-        splitBoundingBoxArray[2] = BoundingBox (minBb + Vec3Df (0.0, y_2, 0.0), med + Vec3Df (0.0, y_2, 0.0));
-        splitBoundingBoxArray[3] = BoundingBox (minBb + Vec3Df (x_2, y_2, 0.0), med + Vec3Df (x_2, y_2, 0.0));
-        splitBoundingBoxArray[4] = BoundingBox (minBb + Vec3Df (0.0, 0.0, z_2), med + Vec3Df (0.0, 0.0, z_2));
-        splitBoundingBoxArray[5] = BoundingBox (minBb + Vec3Df (x_2, 0.0, z_2), med + Vec3Df (x_2, 0.0, z_2));
-        splitBoundingBoxArray[6] = BoundingBox (minBb + Vec3Df (0.0, y_2, z_2), med + Vec3Df (0.0, y_2, z_2));
-        splitBoundingBoxArray[7] = BoundingBox (minBb + Vec3Df (x_2, y_2, z_2), med + Vec3Df (x_2, y_2, z_2));
+        sonBoxes.resize(8);
+        sonBoxes[0] = BoundingBox (minBb, med);
+        sonBoxes[1] = BoundingBox (minBb + Vec3Df (x_2, 0.0, 0.0), med + Vec3Df (x_2, 0.0, 0.0));
+        sonBoxes[2] = BoundingBox (minBb + Vec3Df (0.0, y_2, 0.0), med + Vec3Df (0.0, y_2, 0.0));
+        sonBoxes[3] = BoundingBox (minBb + Vec3Df (x_2, y_2, 0.0), med + Vec3Df (x_2, y_2, 0.0));
+        sonBoxes[4] = BoundingBox (minBb + Vec3Df (0.0, 0.0, z_2), med + Vec3Df (0.0, 0.0, z_2));
+        sonBoxes[5] = BoundingBox (minBb + Vec3Df (x_2, 0.0, z_2), med + Vec3Df (x_2, 0.0, z_2));
+        sonBoxes[6] = BoundingBox (minBb + Vec3Df (0.0, y_2, z_2), med + Vec3Df (0.0, y_2, z_2));
+        sonBoxes[7] = BoundingBox (minBb + Vec3Df (x_2, y_2, z_2), med + Vec3Df (x_2, y_2, z_2));
     }
+
+    inline void split(float cut, unsigned int i, BoundingBox &left, BoundingBox &right) const {
+        left  = BoundingBox(minBb, maxBb);
+        right = BoundingBox(minBb, maxBb);
+
+        left.maxBb[i] = cut;
+        right.minBb[i] = cut;
+
+    }
+
     bool intersectRay (const Vec3Df & origin, const Vec3Df & direction, Vec3Df & intersection) const;
 
 private:
@@ -147,6 +169,7 @@ private:
     }
 
     Vec3Df minBb, maxBb;
+    std::vector<BoundingBox> sonBoxes;
 };
 
 #endif // BOUNDINGBOX_H
