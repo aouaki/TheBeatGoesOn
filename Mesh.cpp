@@ -32,7 +32,7 @@ void Mesh::unmarkAllVertices () {
         vertices[i].unmark ();
 }
 
-void Mesh::computeTriangleNormals (vector<Vec3Df> & triangleNormals) {
+void Mesh::computeTriangleNormals (vector<Vec3Df> & triangleNormals) const{
     for (vector<Triangle>::const_iterator it = triangles.begin ();
          it != triangles.end ();
          it++) {

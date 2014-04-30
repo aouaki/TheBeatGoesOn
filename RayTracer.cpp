@@ -66,6 +66,62 @@ Vec3Df Brdf(const Vec3Df & camPos,
     return ci;
 }
 
+//Function giving the good intersection point (if intersection) or return -1 if not
+
+bool RayTracer::getIntersectionPoint(const Vec3Df & camPos, const Vec3Df & dir, Vec3Df & intersectionPoint, Vec3Df & IntersPointNormal, Object & obj)
+{
+    Scene * scene = Scene::getInstance ();
+    Object & o= scene->getObjects()[0];
+    float smallestIntersectionDistance = 1000000.f;
+
+    bool hasIntersection = false;
+    for (unsigned int k = 0; k < scene->getObjects().size (); k++) {
+        o = scene->getObjects()[k];
+        //std::cout << o.getTrans()
+        Ray ray (camPos-o.getTrans (), dir);
+        hasIntersection = ray.intersect (o.getBoundingBox (), intersectionPoint);
+        if (hasIntersection){
+            Mesh mesh = o.getMesh();
+            std::vector<Triangle> tabTriangle = mesh.getTriangles();
+            std::vector<Vertex> vertices = mesh.getVertices();
+            for(unsigned int m =0 ; m<tabTriangle.size() ; m++){
+                Triangle triangle = tabTriangle[m];
+                Vec3Df normal = o.getTrianglesNormals()[m]; //Pecomputed
+                Vec3Df vertex1 (vertices[triangle.getVertex(0)].getPos());
+                Vec3Df vertex2 (vertices[triangle.getVertex(1)].getPos());
+                Vec3Df vertex3 (vertices[triangle.getVertex(2)].getPos());
+                float intersectionDistance;
+                float coefB[3]; //The three barycentric coefs of the intersection point
+                bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, coefB, intersectionDistance);
+
+                if (hasIntersection) {
+
+                    if (intersectionDistance < smallestIntersectionDistance) {
+
+                        IntersPointNormal =
+                                vertices[triangle.getVertex(0)].getNormal()*coefB[2]
+                                +vertices[triangle.getVertex(1)].getNormal()*coefB[0]
+                                +vertices[triangle.getVertex(2)].getNormal()*coefB[1];
+                        IntersPointNormal = IntersPointNormal/(coefB[0]+coefB[1]+coefB[2]);
+
+                        intersectionPoint =
+                                vertices[triangle.getVertex(0)].getPos()*coefB[2]
+                                +vertices[triangle.getVertex(1)].getPos()*coefB[0]
+                                +vertices[triangle.getVertex(2)].getPos()*coefB[1];
+                        intersectionPoint = intersectionPoint/(coefB[0]+coefB[1]+coefB[2]);
+
+                        smallestIntersectionDistance = intersectionDistance;
+
+                        obj = o;
+                    }
+                }
+            }
+        }
+    }
+
+    return hasIntersection;
+}
+
 // POINT D'ENTREE DU PROJET.
 // Le code suivant ray trace uniquement la boite englobante de la scene.
 // Il faut remplacer ce code par une veritable raytracer
@@ -89,13 +145,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
     const Vec3Df & maxBb = bbox.getMax ();
     const Vec3Df rangeBb = maxBb - minBb;*/
 
-    //We precompute the calcul of triangles normals
-    std::vector<Vec3Df> triangleNormalsByObject[scene->getObjects().size ()];
-    for (unsigned int k = 0; k < scene->getObjects().size (); k++) {
-        const Object & o = scene->getObjects()[k];
-        Mesh mesh = o.getMesh();
-        mesh.computeTriangleNormals(triangleNormalsByObject[k]);
-    }
+
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
     for (unsigned int i = 0; i < screenWidth; i++) {
@@ -107,7 +157,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
             float tanY = tan (fieldOfView);
 
             //Nombre de découpe par dimension du pixel (Antialiasing)
-            int aliaNb = 4;
+            int aliaNb = 2;
             aliaNb++;
 
             Vec3Df c (backgroundColor);
@@ -122,53 +172,13 @@ QImage RayTracer::render (const Vec3Df & camPos,
                     dir.normalize ();
                     Vec3Df intersectionPoint;
                     Vec3Df IntersPointNormal;
-                    float smallestIntersectionDistance = 1000000.f;
-                    Object & o= scene->getObjects()[0];
 
-                    for (unsigned int k = 0; k < scene->getObjects().size (); k++) {
-                        o = scene->getObjects()[k];
-                        //std::cout << o.getTrans()
-                        Ray ray (camPos-o.getTrans (), dir);
-                        bool hasIntersection = ray.intersect (o.getBoundingBox (), intersectionPoint);
-                        if (hasIntersection){
-                            Mesh mesh = o.getMesh();
-                            std::vector<Triangle> tabTriangle = mesh.getTriangles();
-                            std::vector<Vertex> vertices = mesh.getVertices();
-                            for(unsigned int m =0 ; m<tabTriangle.size() ; m++){
-                                Triangle triangle = tabTriangle[m];
-                                Vec3Df normal = triangleNormalsByObject[k][m]; //Pecomputed
-                                Vec3Df vertex1 (vertices[triangle.getVertex(0)].getPos());
-                                Vec3Df vertex2 (vertices[triangle.getVertex(1)].getPos());
-                                Vec3Df vertex3 (vertices[triangle.getVertex(2)].getPos());
-                                float intersectionDistance;
-                                float coefB[3]; //The three barycentric coefs of the intersection point
-                                bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, coefB, intersectionDistance);
-
-                                if (hasIntersection) {
-
-                                    if (intersectionDistance < smallestIntersectionDistance) {
-
-                                        IntersPointNormal =
-                                                vertices[triangle.getVertex(0)].getNormal()*coefB[2]
-                                                +vertices[triangle.getVertex(1)].getNormal()*coefB[0]
-                                                +vertices[triangle.getVertex(2)].getNormal()*coefB[1];
-                                        IntersPointNormal = IntersPointNormal/(coefB[0]+coefB[1]+coefB[2]);
-
-                                        intersectionPoint =
-                                                vertices[triangle.getVertex(0)].getPos()*coefB[2]
-                                                +vertices[triangle.getVertex(1)].getPos()*coefB[0]
-                                                +vertices[triangle.getVertex(2)].getPos()*coefB[1];
-                                        intersectionPoint = intersectionPoint/(coefB[0]+coefB[1]+coefB[2]);
-
-                                        smallestIntersectionDistance = intersectionDistance;
-                                    }
-                                }
-                            }
-                        }
+                    Object obj;
+                    if(getIntersectionPoint(camPos,dir,intersectionPoint,IntersPointNormal,obj))
+                    {
+                        tempc += Brdf(camPos, IntersPointNormal, obj,intersectionPoint)/std::pow(aliaNb-1,2);
+                        c=tempc;
                     }
-
-                    tempc += Brdf(camPos, IntersPointNormal, o,intersectionPoint)/std::pow(aliaNb-1,2);
-                    c=tempc;
                 }
             }
             image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));

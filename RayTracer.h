@@ -31,6 +31,7 @@ public:
                    float aspectRatio,
                    unsigned int screenWidth,
                    unsigned int screenHeight);
+    bool getIntersectionPoint(const Vec3Df & camPos, const Vec3Df & dir, Vec3Df & intersectionPoint, Vec3Df & IntersPointNormal, Object & obj);
 
 protected:
     inline RayTracer () {}

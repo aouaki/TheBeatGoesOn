@@ -20,6 +20,10 @@ public:
     inline Object () {}
     inline Object (const Mesh & mesh, const Material & mat) : mesh (mesh), mat (mat) {
         updateBoundingBox ();
+        //We precompute the calcul of triangles normals
+
+        mesh.computeTriangleNormals(trianglesNormals);
+
     }
     virtual ~Object () {}
 
@@ -34,12 +38,15 @@ public:
 
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
+
+    inline const std::vector<Vec3Df> & getTrianglesNormals () const { return trianglesNormals; }
     
 private:
     Mesh mesh;
     Material mat;
     BoundingBox bbox;
     Vec3Df trans;
+    std::vector<Vec3Df> trianglesNormals;
 };
 
 
