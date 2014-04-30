@@ -66,7 +66,6 @@ Vec3Df Brdf(const Vec3Df & camPos,
     return ci;
 }
 
-
 // POINT D'ENTREE DU PROJET.
 // Le code suivant ray trace uniquement la boite englobante de la scene.
 // Il faut remplacer ce code par une veritable raytracer
@@ -107,12 +106,16 @@ QImage RayTracer::render (const Vec3Df & camPos,
             float tanX = tan (fieldOfView)*aspectRatio;
             float tanY = tan (fieldOfView);
 
+            //Nombre de découpe par dimension du pixel (Antialiasing)
+            int aliaNb = 1;
+            aliaNb++;
+
             Vec3Df c (backgroundColor);
             Vec3Df tempc;
-            for(int pixi=1; pixi<3; pixi++){
-                for(int pixj=1; pixj<3; pixj++){
-                    Vec3Df stepX = (float (i)+std::pow(-1,pixi)*0.25 - screenWidth/2.f)/screenWidth * tanX * rightVector;
-                    Vec3Df stepY = (float (j)+std::pow(-1,pixj)*0.25 - screenHeight/2.f)/screenHeight * tanY * upVector;
+            for(int pixi=1; pixi<aliaNb; pixi++){
+                for(int pixj=1; pixj<aliaNb; pixj++){
+                    Vec3Df stepX = (float (i)-0.5+pixi/aliaNb - screenWidth/2.f)/screenWidth * tanX * rightVector;
+                    Vec3Df stepY = (float (j)-0.5+pixj/aliaNb - screenHeight/2.f)/screenHeight * tanY * upVector;
                     Vec3Df step = stepX + stepY;
 
                     Vec3Df dir = direction + step;
