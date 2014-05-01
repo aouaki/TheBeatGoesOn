@@ -33,11 +33,12 @@ inline int clamp (float f, int inf, int sup) {
 
 Vec3Df Brdf(const Vec3Df & camPos,
             const Vec3Df & normal,
-            const Object object,
+            int idObj,
             const Vec3Df & intersectionPoint){
 
     Scene * scene = Scene::getInstance ();
     std::vector<Light> lights = scene->getLights();
+    Object & object = scene->getObjects()[idObj];
     Vec3Df ci;
     for(unsigned int i =0;i<lights.size();i++)
     {
@@ -61,25 +62,30 @@ Vec3Df Brdf(const Vec3Df & camPos,
         Vec3Df matDiffuseColor = material.getColor();
         Vec3Df matSpecularColor = material.getColor();
 
-        ci += ((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5)*lightColor)*255;
+        ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255;
     }
     return ci;
 }
 
-//Function giving the good intersection point (if intersection) or return -1 if not
+//Function giving the good intersection point (if intersection) or return 0 if not
+//The function links the adress intersectionPoint, IntersectionPointNormal, obj to the actual intersection point, its normal
+//and the object it belongs to.
 
-bool RayTracer::getIntersectionPoint(const Vec3Df & camPos, const Vec3Df & dir, Vec3Df & intersectionPoint, Vec3Df & IntersPointNormal, Object & obj)
+int RayTracer::getIntersectionPoint(const Vec3Df & camPos,
+                                    const Vec3Df & dir,
+                                    Vec3Df & intersectionPoint,
+                                    Vec3Df & IntersPointNormal)
 {
     Scene * scene = Scene::getInstance ();
-    Object & o= scene->getObjects()[0];
     float smallestIntersectionDistance = 1000000.f;
 
-    bool hasIntersection = false;
+    int idObj = -1;
+    bool hasIntersection=false;
     for (unsigned int k = 0; k < scene->getObjects().size (); k++) {
-        o = scene->getObjects()[k];
+        Object & o = scene->getObjects()[k];
         //std::cout << o.getTrans()
         Ray ray (camPos-o.getTrans (), dir);
-        hasIntersection = ray.intersect (o.getBoundingBox (), intersectionPoint);
+        hasIntersection = ray.intersect (o.getBoundingBox ());
         if (hasIntersection){
             Mesh mesh = o.getMesh();
             std::vector<Triangle> tabTriangle = mesh.getTriangles();
@@ -112,14 +118,16 @@ bool RayTracer::getIntersectionPoint(const Vec3Df & camPos, const Vec3Df & dir, 
 
                         smallestIntersectionDistance = intersectionDistance;
 
-                        obj = o;
+                        idObj=k;
+
+
                     }
                 }
             }
         }
     }
 
-    return hasIntersection;
+    return idObj;
 }
 
 // POINT D'ENTREE DU PROJET.
@@ -157,11 +165,11 @@ QImage RayTracer::render (const Vec3Df & camPos,
             float tanY = tan (fieldOfView);
 
             //Nombre de découpe par dimension du pixel (Antialiasing)
-            int aliaNb = 2;
+            int aliaNb = 1;
             aliaNb++;
 
             Vec3Df c (backgroundColor);
-            Vec3Df tempc;
+            Vec3Df tempc(backgroundColor);
             for(int pixi=1; pixi<aliaNb; pixi++){
                 for(int pixj=1; pixj<aliaNb; pixj++){
                     Vec3Df stepX = (float (i)-0.5+float(pixi)/float(aliaNb) - screenWidth/2.f)/screenWidth * tanX * rightVector;
@@ -173,14 +181,22 @@ QImage RayTracer::render (const Vec3Df & camPos,
                     Vec3Df intersectionPoint;
                     Vec3Df IntersPointNormal;
 
-                    Object obj;
-                    if(getIntersectionPoint(camPos,dir,intersectionPoint,IntersPointNormal,obj))
+                    int idObj = getIntersectionPoint(camPos,dir,intersectionPoint,IntersPointNormal);
+
+                    if(idObj>=0)
                     {
-                        tempc += Brdf(camPos, IntersPointNormal, obj,intersectionPoint)/std::pow(aliaNb-1,2);
+                        //Prise en compte des ombre on vérifie qu'il n'y a aucune intersection avec
+                        //un autre triangle entre le point d'intersection et la lumière
+                        //if(!getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint,IntersPointNormal))
+                        //{
+                        tempc += Brdf(camPos, IntersPointNormal, idObj,intersectionPoint)/std::pow(aliaNb-1,2);
                         c=tempc;
+                        //}
+
                     }
                 }
             }
+
             image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
         }
     }
