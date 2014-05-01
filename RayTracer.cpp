@@ -31,7 +31,7 @@ inline int clamp (float f, int inf, int sup) {
     return (v < inf ? inf : (v > sup ? sup : v));
 }
 
-Vec3Df Brdf(const Vec3Df & camPos,
+Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
             const Vec3Df & normal,
             int idObj,
             const Vec3Df & intersectionPoint){
@@ -62,7 +62,12 @@ Vec3Df Brdf(const Vec3Df & camPos,
         Vec3Df matDiffuseColor = material.getColor();
         Vec3Df matSpecularColor = material.getColor();
 
-        ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255;
+        Vec3Df intersectionPoint2;
+        Vec3Df IntersPointNormal2;
+
+        //Prise en compte des ombres
+        if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
+            ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255;
     }
     return ci;
 }
@@ -165,7 +170,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
             float tanY = tan (fieldOfView);
 
             //Nombre de découpe par dimension du pixel (Antialiasing)
-            int aliaNb = 1;
+            int aliaNb = 2;
             aliaNb++;
 
             Vec3Df c (backgroundColor);
@@ -187,11 +192,10 @@ QImage RayTracer::render (const Vec3Df & camPos,
                     {
                         //Prise en compte des ombre on vérifie qu'il n'y a aucune intersection avec
                         //un autre triangle entre le point d'intersection et la lumière
-                        //if(!getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint,IntersPointNormal))
-                        //{
+
+
                         tempc += Brdf(camPos, IntersPointNormal, idObj,intersectionPoint)/std::pow(aliaNb-1,2);
                         c=tempc;
-                        //}
 
                     }
                 }

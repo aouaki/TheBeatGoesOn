@@ -32,6 +32,7 @@ public:
                    unsigned int screenWidth,
                    unsigned int screenHeight);
     int getIntersectionPoint(const Vec3Df & camPos, const Vec3Df & dir, Vec3Df & intersectionPoint, Vec3Df & IntersPointNormal);
+    Vec3Df Brdf(const Vec3Df & camPos,const Vec3Df & normal,int idObj,const Vec3Df & intersectionPoint);
 
 protected:
     inline RayTracer () {}
