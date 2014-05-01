@@ -53,6 +53,7 @@ public:
     void buildKDTree ();
 
     inline float findMedianSample(std::vector<unsigned> & triangles, int dim);
+    bool static boxTriangleIntersectionTest(Vec3Df &A, Vec3Df &B, Vec3Df &C, BoundingBox box);
 };
 
 #endif // KDNODE_H
