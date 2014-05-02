@@ -10,6 +10,7 @@
 #include "Scene.h"
 #include <QProgressDialog>
 #include "math.h"
+#include <cstdlib>
 
 static RayTracer * instance = NULL;
 
@@ -65,9 +66,28 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
         Vec3Df intersectionPoint2;
         Vec3Df IntersPointNormal2;
 
-        //Prise en compte des ombres
-        if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
-            ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255;
+        //Area Lighting
+        int nbrayshadow=4;
+        float radius=0.1f;
+        for(int p = 0;p<nbrayshadow;p++)
+        {
+            float a = ((float)std::rand())/((float)RAND_MAX);
+            float b = ((float)std::rand())/((float)RAND_MAX);
+            float c = ((float)std::rand())/((float)RAND_MAX);
+
+            float sum = a+b+c;
+            a=a/sum*radius;
+            b=b/sum*radius;
+            c=c/sum*radius;
+            Vec3Df lightposbis;
+
+            lightposbis[0]=light.getPos()[0]+a;
+            lightposbis[1]=light.getPos()[1]+b;
+            lightposbis[2]=light.getPos()[2]+c;
+
+            if(getIntersectionPoint(intersectionPoint,-intersectionPoint+lightposbis,intersectionPoint2,IntersPointNormal2)==-1)
+                ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;
+        }
     }
     return ci;
 }
@@ -164,7 +184,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
             float tanY = tan (fieldOfView);
 
             //Nombre de découpe par dimension du pixel (Antialiasing)
-            int aliaNb = 2;
+            int aliaNb = 1;
             aliaNb++;
 
             Vec3Df c (backgroundColor);
