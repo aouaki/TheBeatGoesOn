@@ -24,8 +24,11 @@ public:
     inline const Vec3Df & getBackgroundColor () const { return backgroundColor;}
     inline void setBackgroundColor (const Vec3Df & c) { backgroundColor = c; }
 
-    inline bool runKdTree(const KDNode *tree, float & smallestIntersectionDistance, Vec3Df & intersectionPoint, Vec3Df & c, Ray & ray, Mesh & mesh, unsigned int & k);
-    inline bool searchLeaf(const KDNode *&tree, float & smallestIntersectionDistance, Vec3Df & c, Ray & ray, Mesh & mesh, unsigned int & k);
+    inline std::vector<KDNode *> order(float & rayDir, KDNode *leftChild, KDNode *rightChild);
+    inline bool searchNode (const KDNode *node, Ray &ray, Mesh &mesh, Vec3Df &c, unsigned &k);
+    inline bool searchSplit(const KDNode *node, Ray &ray, Mesh &mesh, Vec3Df &c, unsigned &k);
+    inline bool searchLeaf(const KDNode *node, Ray &ray, Mesh &mesh, Vec3Df &c, unsigned &k);
+    inline void continueSearch(Ray &ray, Mesh &mesh, Vec3Df &c, unsigned &k);
 
     QImage render (const Vec3Df & camPos,
                    const Vec3Df & viewDirection,

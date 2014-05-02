@@ -35,6 +35,28 @@ void GLViewer::setWireframe (bool b) {
     updateGL ();
 }
 
+void GLViewer::setKd (bool b){
+    kdtree = b;
+    if (kdtree)
+    {
+        //glDisable(GL_LIGHTING);
+        glColor3f(0, 0, 0);
+        Scene * scene = Scene::getInstance ();
+        for (unsigned k=0; k<scene->getObjects().size(); k++) {
+            Object o = scene->getObjects()[k];
+            const Vec3Df & trans = o.getTrans ();
+//            glPushMatrix ();
+//            glTranslatef (trans[0], trans[1], trans[2]);
+            //drawNode(o.getTree());
+            drawCube(o.getBoundingBox().getMin(), o.getBoundingBox().getMax());
+//            glPopMatrix ();
+        }
+    }
+    else
+        std::cout << "kdtree deactivated" << std::endl;
+    updateGL ();
+}
+
 void GLViewer::setRenderingMode (RenderingMode m) {
     renderingMode = m;
     updateGL ();
@@ -122,6 +144,38 @@ void GLViewer::init() {
     setSceneCenter (qglviewer::Vec (c[0], c[1], c[2]));
     setSceneRadius (r);
     showEntireScene ();
+}
+
+
+void GLViewer::drawCube(const Vec3Df min, const Vec3Df max) {
+    glBegin(GL_LINES);
+    glVertex3f(min[0], min[1], min[2]);
+    glVertex3f(max[0], min[1], min[2]);
+    glVertex3f(min[0], min[1], min[2]);
+    glVertex3f(min[0], max[1], min[2]);
+    glVertex3f(max[0], max[1], min[2]);
+    glVertex3f(max[0], min[1], min[2]);
+    glVertex3f(max[0], max[1], min[2]);
+    glVertex3f(min[0], max[1], min[2]);
+
+    glVertex3f(min[0], min[1], max[2]);
+    glVertex3f(max[0], min[1], max[2]);
+    glVertex3f(min[0], min[1], max[2]);
+    glVertex3f(min[0], max[1], max[2]);
+    glVertex3f(max[0], max[1], max[2]);
+    glVertex3f(max[0], min[1], max[2]);
+    glVertex3f(max[0], max[1], max[2]);
+    glVertex3f(min[0], max[1], max[2]);
+
+    glVertex3f(min[0], min[1], min[2]);
+    glVertex3f(min[0], min[1], max[2]);
+    glVertex3f(min[0], max[1], min[2]);
+    glVertex3f(min[0], max[1], max[2]);
+    glVertex3f(max[0], max[1], min[2]);
+    glVertex3f(max[0], max[1], max[2]);
+    glVertex3f(max[0], min[1], min[2]);
+    glVertex3f(max[0], min[1], max[2]);
+    glEnd();
 }
 
 void GLViewer::draw () {

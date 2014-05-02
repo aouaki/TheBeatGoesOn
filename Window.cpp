@@ -132,6 +132,10 @@ void Window::initControlWidget () {
     QCheckBox * wireframeCheckBox = new QCheckBox ("Wireframe", previewGroupBox);
     connect (wireframeCheckBox, SIGNAL (toggled (bool)), viewer, SLOT (setWireframe (bool)));
     previewLayout->addWidget (wireframeCheckBox);
+
+    QCheckBox * kdCheckBox = new QCheckBox ("KD-Tree", previewGroupBox);
+    connect (kdCheckBox, SIGNAL (toggled (bool)), viewer, SLOT (setKd (bool)));
+    previewLayout->addWidget (kdCheckBox);
    
     QButtonGroup * modeButtonGroup = new QButtonGroup (previewGroupBox);
     modeButtonGroup->setExclusive (true);

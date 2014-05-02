@@ -14,7 +14,7 @@ KDNode::KDNode(Object &o):o(o),
     buildKDTree();
 }
 
-KDNode::KDNode(Object &o, std::vector<unsigned> partition, int &axis, float &q, BoundingBox &box): o(o), triangles(partition), axis(axis), medianIndix(q), bbox(box) {
+KDNode::KDNode(Object &o, std::vector<unsigned> partition, int &axis, float &q, BoundingBox &box): o(o), triangles(partition), axis(axis), median(q), bbox(box) {
     buildKDTree();
 }
 
@@ -47,15 +47,14 @@ void KDNode::splitTriangles(std::vector <unsigned> &leftTri, std::vector <unsign
         bool isInLeft = false;
         bool isInRight = false;
 
-        for(unsigned i = 0 ; i<3 ; i++) {
-            unsigned v = mesh.getTriangles()[t].getVertex(i);
-            const Vec3Df & p = mesh.getVertices()[v].getPos();
-            if(leftBox.contains(p))
-                isInLeft = true;
-            else if(rightBox.contains(p))
-                isInRight = true;
-        }
-
+        unsigned v = mesh.getTriangles()[t].getVertex(0);
+        const Vec3Df & vertex0 = mesh.getVertices()[v].getPos();
+        v = mesh.getTriangles()[t].getVertex(1);
+        const Vec3Df & vertex1 = mesh.getVertices()[v].getPos();
+        v = mesh.getTriangles()[t].getVertex(2);
+        const Vec3Df & vertex2 = mesh.getVertices()[v].getPos();
+        isInLeft = boxTriangleIntersectionTest(vertex0, vertex1, vertex2, leftBox);
+        isInRight = boxTriangleIntersectionTest(vertex0, vertex1, vertex2, rightBox);
         if(isInLeft)
             leftTri.push_back(t);
         if(isInRight)
@@ -66,19 +65,19 @@ void KDNode::splitTriangles(std::vector <unsigned> &leftTri, std::vector <unsign
 void KDNode::buildKDTree (){
     if(triangles.size() <= MIN_TRIANGLES) {return;}
     axis = bbox.getMaxAxis();
-    medianIndix = findMedianSample(triangles, axis);
+    median = findMedianSample(triangles, axis);
     BoundingBox leftBox;
     BoundingBox rightBox;
-    bbox.split(medianIndix, axis, leftBox, rightBox);
+    bbox.split(median, axis, leftBox, rightBox);
     std::vector <unsigned> leftTri;
     std::vector <unsigned> rightTri;
     splitTriangles(leftTri, rightTri, leftBox, rightBox);
-    leftChild = new KDNode(o, leftTri, axis, medianIndix, leftBox);
-    rightChild = new KDNode(o, rightTri, axis, medianIndix, rightBox);
+    leftChild = new KDNode(o, leftTri, axis, median, leftBox);
+    rightChild = new KDNode(o, rightTri, axis, median, rightBox);
     triangles.clear();
 }
 
-bool KDNode::boxTriangleIntersectionTest(Vec3Df &A, Vec3Df &B, Vec3Df &C, BoundingBox box){
+bool KDNode::boxTriangleIntersectionTest(const Vec3Df &A, const Vec3Df &B, const Vec3Df &C, BoundingBox box){
 
     float min,max,p0,p1,p2,rad,fex,fey,fez;
     //on récupère infos
@@ -95,10 +94,7 @@ bool KDNode::boxTriangleIntersectionTest(Vec3Df &A, Vec3Df &B, Vec3Df &C, Boundi
     Vec3Df v2 = B - center;
     Vec3Df v3 = C - center;
 
-    std::cout << center << std::endl;
-
     //1ERE SERIE TESTS
-    std::cout << "debut 1er tests" << std::endl;
     //selon x :
     min=std::min(v1[0],std::min(v2[0],v3[0]));
     max=std::max(v1[0],std::min(v2[0],v3[0]));
@@ -113,7 +109,6 @@ bool KDNode::boxTriangleIntersectionTest(Vec3Df &A, Vec3Df &B, Vec3Df &C, Boundi
     if(min>length/2 || max<-length/2) return false;
 
     //2EME SERIE DE TESTS
-    std::cout << "debut 2eme tests" << std::endl;
     Vec3Df e0 = v2 - v1;
     Vec3Df e1 = v3 - v2;
     Vec3Df e2 = v1 - v3;
@@ -149,7 +144,6 @@ bool KDNode::boxTriangleIntersectionTest(Vec3Df &A, Vec3Df &B, Vec3Df &C, Boundi
         return true;}
 
     //3EME SERIE DE TESTS
-    std::cout << "debut 3eme tests" << std::endl;
     Vec3Df boxhalfsize=maxbox;
     //selon x :
     fex = std::fabs(e0[0]);  //noté fabsf(...) mais fabsf n'existe pas ???
@@ -272,9 +266,5 @@ bool KDNode::boxTriangleIntersectionTest(Vec3Df &A, Vec3Df &B, Vec3Df &C, Boundi
 
 
     //si tous tests n'ont rien retourné
-
-
-
-
-
+    return false;
 }

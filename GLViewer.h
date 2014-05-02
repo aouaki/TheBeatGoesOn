@@ -25,7 +25,11 @@ public:
     
     GLViewer ();
     virtual ~GLViewer ();
-    
+
+    bool drawNode(const KDNode *t) {
+        drawCube(t->bbox.getMin(), t->bbox.getMax());
+        return true;
+    }
     inline bool isWireframe () const { return wireframe; }
     inline int getRenderingMode () const { return renderingMode; }
     inline const QImage & getRayImage () const { return rayImage; }
@@ -41,6 +45,7 @@ public:
      
 public slots :
     void setWireframe (bool b);
+    void setKd (bool b);
     void setRenderingMode (RenderingMode m);
     void setRenderingMode (int m) { setRenderingMode (static_cast<RenderingMode>(m)); }
     void setDisplayMode (DisplayMode m);
@@ -48,6 +53,7 @@ public slots :
     void setRayImage (const QImage & image);
     
 protected :
+    void drawCube(const Vec3Df min, const Vec3Df max);
     void init();
     void draw ();
     QString helpString() const;
@@ -59,6 +65,7 @@ protected :
 
 private:
     bool wireframe;
+    bool kdtree;
     RenderingMode renderingMode;
     DisplayMode displayMode;
     QImage rayImage;
