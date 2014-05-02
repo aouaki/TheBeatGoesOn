@@ -90,19 +90,18 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
             lightposbis[1]=light.getPos()[1]+b;
             lightposbis[2]=light.getPos()[2]+c;
 
-
-            Vec3Df vDir= intersectionPoint-camPos;
-            vDir.normalize();
-            Vec3Df planA = Vec3Df::crossProduct(n, Vec3Df::crossProduct(vDir, n));
-            Vec3Df newDir = Vec3Df::dotProduct(planA, vDir)*planA - Vec3Df::dotProduct(vDir, n)*n;
-            int obj = getIntersectionPoint(intersectionPoint, newDir, intersectionPoint2, IntersPointNormal2);
-            if(obj>-1)
+            if(idObj==0)
             {
-                Object obj2= scene->getObjects()[obj];
-                Material material2 = obj2.getMaterial();
-                Vec3Df matDiffuseColor2 = material2.getColor();
-                Vec3Df matSpecularColor2 = material2.getColor();
-                if(idObj==0) ci += (((matDiffuseColor2) +( matSpecularColor2*0.5))*lightColor)*255/nbrayshadow/2;
+                Vec3Df vDir= intersectionPoint-camPos;
+                vDir.normalize();
+                Vec3Df planA = Vec3Df::crossProduct(n, Vec3Df::crossProduct(vDir, n));
+                Vec3Df newDir = Vec3Df::dotProduct(planA, vDir)*planA - Vec3Df::dotProduct(vDir, n)*n;
+                int obj = getIntersectionPoint(intersectionPoint, newDir, intersectionPoint2, IntersPointNormal2);
+                if(obj>-1)
+                {
+                    Vec3Df reflectedColor = Brdf(intersectionPoint,IntersPointNormal2,obj,intersectionPoint2);
+                    ci += reflectedColor/2;
+                }
             }
 
 
