@@ -42,66 +42,67 @@ inline std::vector<KDNode *> RayTracer::order(float & rayDir, KDNode *leftChild,
     return orderedVector;
 }
 
-inline bool RayTracer::searchNode (const KDNode *node, Ray &ray, Mesh &mesh, Vec3Df &c, unsigned &k){
+inline bool RayTracer::searchNode (const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, Vec3Df &c, unsigned &k, float smallestIntersectionDistance){
     if (node->isLeaf())
     {
-        return searchLeaf(node, ray, mesh, c, k);
+        return searchLeaf(node, ray, meshTriangles, vertices, triangleNormals, c, k, smallestIntersectionDistance);
     }
     else
     {
-        return searchSplit(node, ray, mesh, c, k);
+        return searchSplit(node, ray, meshTriangles, vertices, triangleNormals, c, k, smallestIntersectionDistance);
     }
 
 }
 
-inline bool RayTracer::searchSplit(const KDNode *node, Ray &ray, Mesh &mesh, Vec3Df &c, unsigned &k){
+inline bool RayTracer::searchSplit(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, Vec3Df &c, unsigned &k, float smallestIntersectionDistance){
     Vec3Df intersectionPoint;
     bool isInFirst= ray.intersect(node->getLeftChild()->bbox, intersectionPoint);
     bool isInSecond = ray.intersect(node->getRightChild()->bbox, intersectionPoint);
     if (isInFirst && isInSecond) {
         std::vector<KDNode *> ordered = order( ray.getDirection()[node->getAxis()], node->getLeftChild(), node->getRightChild());
-        bool inFirstNode = searchNode( ordered[0], ray, mesh, c, k);
+        bool inFirstNode = searchNode( ordered[0], ray, meshTriangles, vertices, triangleNormals, c, k, smallestIntersectionDistance);
         if (inFirstNode)
             return true;
         else
-            return searchNode( ordered[1], ray, mesh, c, k);
+            return searchNode( ordered[1], ray, meshTriangles, vertices, triangleNormals, c, k, smallestIntersectionDistance);
     }
     else if( isInFirst ) {
-        return searchNode( node->getLeftChild(), ray, mesh, c, k);
+        return searchNode( node->getLeftChild(), ray, meshTriangles, vertices, triangleNormals, c, k, smallestIntersectionDistance);
     }
     else if( isInSecond ) {
-        return searchNode( node->getRightChild(), ray, mesh, c, k);
+        return searchNode( node->getRightChild(), ray, meshTriangles, vertices, triangleNormals, c, k, smallestIntersectionDistance);
     }
     return false;
 }
 
-inline bool RayTracer::searchLeaf(const KDNode *node, Ray &ray, Mesh &mesh, Vec3Df &c, unsigned &k){
-    const std::vector <Triangle> & meshTriangles = mesh.getTriangles();
-    const std::vector <Vertex> vertices = mesh.getVertices();
-    for (unsigned nbTri = 0; nbTri < node->getTriangles().size(); nbTri++) {
-        unsigned idTri = node->getTriangles()[nbTri];
-        const Triangle & triangle = meshTriangles[idTri];
-        const Vec3Df & vertex1 = vertices [triangle.getVertex(0)].getPos();
-        const Vec3Df & vertex2 = vertices [triangle.getVertex(1)].getPos();
-        const Vec3Df & vertex3 = vertices [triangle.getVertex(2)].getPos();
-        std::vector<Vec3Df> triangleNormals;
-        mesh.computeTriangleNormals(triangleNormals);
-        Vec3Df normal = triangleNormals[idTri];
+inline bool RayTracer::searchLeaf(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, Vec3Df &c, unsigned &k, float smallestIntersectionDistance){
+    std::vector<unsigned> triangleList = node->getTriangles();
+
+    for (std::vector<unsigned>::iterator idTri = triangleList.begin() ; idTri != triangleList.end(); ++idTri){
+        Triangle triangle = meshTriangles[*idTri];
+        Vec3Df vertex1 = vertices [triangle.getVertex(0)].getPos();
+        Vec3Df vertex2 = vertices [triangle.getVertex(1)].getPos();
+        Vec3Df vertex3 = vertices [triangle.getVertex(2)].getPos();
+        Vec3Df normal = triangleNormals[*idTri];
         float intersectionDistance;
         bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, intersectionDistance);
 
         if (hasIntersection) {
-            for(int l=0 ; l<3 ; l++){
-                if (k==0){
-                    c[l] = 100;
-                }
-                else{
-                    c[l] = 200;
+            if (intersectionDistance<smallestIntersectionDistance)
+            {
+                for(int l=0 ; l<3 ; l++){
+                    if (k==0){
+                        c[l] = 100;
+                    }
+                    else{
+                        c[l] = 200;
+                    }
                 }
             }
             return true;
         }
     }
+
     return false;
 }
 
@@ -127,6 +128,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
             Vec3Df stepY = (float (j) - screenHeight/2.f)/screenHeight * tanY * upVector;
             Vec3Df step = stepX + stepY;
             Vec3Df dir = direction + step;
+            float smallestIntersectionDistance = 10e8;
             dir.normalize ();
             Vec3Df c (backgroundColor);
             for (unsigned int k = 0; k < scene->getObjects().size (); k++) {
@@ -136,7 +138,12 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 bool hasIntersection = ray.intersect(o.getBoundingBox(), intersectionPoint);
                 if (hasIntersection){
                     Mesh mesh = o.getMesh();
-                    searchNode(o.getTree(), ray, mesh, c, k);
+                    std::vector <Triangle> meshTriangles = mesh.getTriangles();
+                    std::vector <Vertex> vertices = mesh.getVertices();
+                    std::vector<Vec3Df> triangleNormals;
+                    mesh.computeTriangleNormals(triangleNormals);
+
+                    searchNode(o.getTree(), ray, meshTriangles, vertices, triangleNormals, c, k, smallestIntersectionDistance);
                 }
             }
             image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));

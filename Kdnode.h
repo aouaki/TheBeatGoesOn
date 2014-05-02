@@ -22,7 +22,7 @@ protected:
     KDNode *leftChild, *rightChild;
 
 public:
-    static const unsigned MIN_TRIANGLES = 30;
+    static const unsigned MIN_TRIANGLES = 20;
     const BoundingBox bbox;
     KDNode(Object &o);
     KDNode(Object &o, std::vector<unsigned> partition, int &axis, float &q, BoundingBox &box);
@@ -31,7 +31,6 @@ public:
         delete leftChild;
         delete rightChild;
     }
-
 
     inline float getMedian() const {return median;}
     inline int getAxis() const {return axis;}
@@ -50,7 +49,7 @@ public:
     }
 
     void splitTriangles(std::vector <unsigned> &leftTri, std::vector <unsigned> &rightTri, BoundingBox &leftBox, BoundingBox &rightBox);
-    void buildKDTree ();
+    void buildKDTree (float oldMed);
 
     inline float findMedianSample(std::vector<unsigned> & triangles, int dim);
     bool boxTriangleIntersectionTest(const Vec3Df &A, const Vec3Df &B, const Vec3Df &C, BoundingBox box);

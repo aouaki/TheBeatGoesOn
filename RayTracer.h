@@ -25,10 +25,9 @@ public:
     inline void setBackgroundColor (const Vec3Df & c) { backgroundColor = c; }
 
     inline std::vector<KDNode *> order(float & rayDir, KDNode *leftChild, KDNode *rightChild);
-    inline bool searchNode (const KDNode *node, Ray &ray, Mesh &mesh, Vec3Df &c, unsigned &k);
-    inline bool searchSplit(const KDNode *node, Ray &ray, Mesh &mesh, Vec3Df &c, unsigned &k);
-    inline bool searchLeaf(const KDNode *node, Ray &ray, Mesh &mesh, Vec3Df &c, unsigned &k);
-    inline void continueSearch(Ray &ray, Mesh &mesh, Vec3Df &c, unsigned &k);
+    inline bool searchNode (const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, Vec3Df &c, unsigned &k, float smallestIntersectionDistance);
+    inline bool searchSplit(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, Vec3Df &c, unsigned &k, float smallestIntersectionDistance);
+    inline bool searchLeaf(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, Vec3Df &c, unsigned &k, float smallestIntersectionDistance);
 
     QImage render (const Vec3Df & camPos,
                    const Vec3Df & viewDirection,

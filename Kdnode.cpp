@@ -11,11 +11,11 @@ KDNode::KDNode(Object &o):o(o),
     {
         triangles[i] = i;
     }
-    buildKDTree();
+    buildKDTree(0);
 }
 
 KDNode::KDNode(Object &o, std::vector<unsigned> partition, int &axis, float &q, BoundingBox &box): o(o), triangles(partition), axis(axis), median(q), bbox(box) {
-    buildKDTree();
+    buildKDTree(median);
 }
 
 inline float KDNode::findMedianSample(std::vector<unsigned> & triangles, int dim){
@@ -62,10 +62,11 @@ void KDNode::splitTriangles(std::vector <unsigned> &leftTri, std::vector <unsign
     }
 }
 
-void KDNode::buildKDTree (){
+void KDNode::buildKDTree (float oldMed){
     if(triangles.size() <= MIN_TRIANGLES) {return;}
     axis = bbox.getMaxAxis();
     median = findMedianSample(triangles, axis);
+    if(median==oldMed) {return;}
     BoundingBox leftBox;
     BoundingBox rightBox;
     bbox.split(median, axis, leftBox, rightBox);
@@ -102,7 +103,7 @@ bool KDNode::boxTriangleIntersectionTest(const Vec3Df &A, const Vec3Df &B, const
     //selon y :
     min=std::min(v1[1],std::min(v2[1],v3[1]));
     max=std::max(v1[1],std::min(v2[1],v3[1]));
-    if(min>height/2 || max<-height/2) return false;
+    if(min>height/2 || max<-height/2) return true;
     //selon z :
     min=std::min(v1[2],std::min(v2[2],v3[2]));
     max=std::max(v1[2],std::min(v2[2],v3[2]));
@@ -200,7 +201,7 @@ bool KDNode::boxTriangleIntersectionTest(const Vec3Df &A, const Vec3Df &B, const
 
     rad = fez * boxhalfsize[1] + fey * boxhalfsize[2];
 
-    if(min>rad || max<-rad) return false;
+    if(min>rad || max<-rad) return true;
 
     //AXISTEST_Y02(e1[Z], e1[X], fez, fex);
 

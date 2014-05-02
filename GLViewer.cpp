@@ -37,23 +37,6 @@ void GLViewer::setWireframe (bool b) {
 
 void GLViewer::setKd (bool b){
     kdtree = b;
-    if (kdtree)
-    {
-        //glDisable(GL_LIGHTING);
-        glColor3f(0, 0, 0);
-        Scene * scene = Scene::getInstance ();
-        for (unsigned k=0; k<scene->getObjects().size(); k++) {
-            Object o = scene->getObjects()[k];
-            const Vec3Df & trans = o.getTrans ();
-//            glPushMatrix ();
-//            glTranslatef (trans[0], trans[1], trans[2]);
-            //drawNode(o.getTree());
-            drawCube(o.getBoundingBox().getMin(), o.getBoundingBox().getMax());
-//            glPopMatrix ();
-        }
-    }
-    else
-        std::cout << "kdtree deactivated" << std::endl;
     updateGL ();
 }
 
@@ -146,8 +129,22 @@ void GLViewer::init() {
     showEntireScene ();
 }
 
+void GLViewer::drawTree(const KDNode *node){
+    if(!node->isLeaf()){
+        drawTree(node->getLeftChild());
+        drawTree(node->getRightChild());
+    }
+    else
+        drawNode(node);
+}
+
+void GLViewer::drawNode(const KDNode *t){
+    drawCube(t->bbox.getMin(), t->bbox.getMax());
+}
 
 void GLViewer::drawCube(const Vec3Df min, const Vec3Df max) {
+    glColor3f(0,0,0);
+
     glBegin(GL_LINES);
     glVertex3f(min[0], min[1], min[2]);
     glVertex3f(max[0], min[1], min[2]);
@@ -213,6 +210,10 @@ void GLViewer::draw () {
         glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 128);
         glDisable (GL_COLOR_MATERIAL);
         o.getMesh ().renderGL (renderingMode == Flat);
+        if (kdtree){
+            const KDNode *tree = o.getTree();
+            drawTree(tree);
+        }
         glPopMatrix ();
     }
 }

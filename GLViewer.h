@@ -26,10 +26,8 @@ public:
     GLViewer ();
     virtual ~GLViewer ();
 
-    bool drawNode(const KDNode *t) {
-        drawCube(t->bbox.getMin(), t->bbox.getMax());
-        return true;
-    }
+    void drawTree(const KDNode *node);
+    void drawNode(const KDNode *t);
     inline bool isWireframe () const { return wireframe; }
     inline int getRenderingMode () const { return renderingMode; }
     inline const QImage & getRayImage () const { return rayImage; }
