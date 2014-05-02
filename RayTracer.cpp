@@ -12,6 +12,8 @@
 #include "math.h"
 #include <cstdlib>
 
+#include <omp.h>
+
 static RayTracer * instance = NULL;
 
 RayTracer * RayTracer::getInstance () {
@@ -67,8 +69,11 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
         Vec3Df IntersPointNormal2;
 
         //Area Lighting
-        int nbrayshadow=4;
+        int nbrayshadow=1;
         float radius=0.1f;
+
+
+
         for(int p = 0;p<nbrayshadow;p++)
         {
             float a = ((float)std::rand())/((float)RAND_MAX);
@@ -85,8 +90,27 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
             lightposbis[1]=light.getPos()[1]+b;
             lightposbis[2]=light.getPos()[2]+c;
 
-            if(getIntersectionPoint(intersectionPoint,-intersectionPoint+lightposbis,intersectionPoint2,IntersPointNormal2)==-1)
-                ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;
+
+            Vec3Df vDir= intersectionPoint-camPos;
+            vDir.normalize();
+            Vec3Df planA = Vec3Df::crossProduct(n, Vec3Df::crossProduct(vDir, n));
+            Vec3Df newDir = Vec3Df::dotProduct(planA, vDir)*planA - Vec3Df::dotProduct(vDir, n)*n;
+            int obj = getIntersectionPoint(intersectionPoint, newDir, intersectionPoint2, IntersPointNormal2);
+            if(obj>-1)
+            {
+                Object obj2= scene->getObjects()[obj];
+                Material material2 = obj2.getMaterial();
+                Vec3Df matDiffuseColor2 = material2.getColor();
+                Vec3Df matSpecularColor2 = material2.getColor();
+                if(idObj==0) ci += (((matDiffuseColor2) +( matSpecularColor2*0.5))*lightColor)*255/nbrayshadow/2;
+            }
+
+
+            ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;
+
+
+            /*if(getIntersectionPoint(intersectionPoint,-intersectionPoint+lightposbis,intersectionPoint2,IntersPointNormal2)==-1)
+                ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;*/
         }
     }
     return ci;
@@ -175,6 +199,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
 
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
+
+    //#pragma omp parallel for
     for (unsigned int i = 0; i < screenWidth; i++) {
         progressDialog.setValue ((100*i)/screenWidth);
         for (unsigned int j = 0; j < screenHeight; j++) {
