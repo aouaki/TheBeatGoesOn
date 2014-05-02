@@ -69,11 +69,10 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
         Vec3Df IntersPointNormal2;
 
         //Area Lighting
-        int nbrayshadow=1;
         float radius=0.1f;
 
         //Miroir
-        if(idObj==0)
+        if(scene->getObjects()[idObj].getRefl()>0 && activeMirror)
         {
             Vec3Df vDir= intersectionPoint-camPos;
             vDir.normalize();
@@ -84,35 +83,39 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
             {
                 if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
                 {
-                    Vec3Df reflectedColor = Brdf(intersectionPoint,IntersPointNormal2,obj,intersectionPoint2);
-                    ci += (reflectedColor+(((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255)/nbrayshadow;
+                    ci += Brdf(intersectionPoint,IntersPointNormal2,obj,intersectionPoint2)*scene->getObjects()[idObj].getRefl();
                 }
             }
         }
 
 
-        for(int p = 0;p<nbrayshadow;p++)
-        {
-            float a = ((float)std::rand())/((float)RAND_MAX);
-            float b = ((float)std::rand())/((float)RAND_MAX);
-            float c = ((float)std::rand())/((float)RAND_MAX);
+        if(nbRayShadow>0)
+            for(int p = 0;p<nbRayShadow;p++)
+            {
+                float a = ((float)std::rand())/((float)RAND_MAX);
+                float b = ((float)std::rand())/((float)RAND_MAX);
+                float c = ((float)std::rand())/((float)RAND_MAX);
 
-            float sum = a+b+c;
-            a=a/sum*radius;
-            b=b/sum*radius;
-            c=c/sum*radius;
-            Vec3Df lightposbis;
+                float sum = a+b+c;
+                a=a/sum*radius;
+                b=b/sum*radius;
+                c=c/sum*radius;
+                Vec3Df lightposbis;
 
-            lightposbis[0]=light.getPos()[0]+a;
-            lightposbis[1]=light.getPos()[1]+b;
-            lightposbis[2]=light.getPos()[2]+c;
+                lightposbis[0]=light.getPos()[0]+a;
+                lightposbis[1]=light.getPos()[1]+b;
+                lightposbis[2]=light.getPos()[2]+c;
 
-                if(getIntersectionPoint(intersectionPoint,-intersectionPoint+lightposbis,intersectionPoint2,IntersPointNormal2)==-1)
-                {
-                    ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;
-                }
-         }
-
+                    if(getIntersectionPoint(intersectionPoint,-intersectionPoint+lightposbis,intersectionPoint2,IntersPointNormal2)==-1)
+                    {
+                        ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbRayShadow;
+                    }
+             }
+        else
+            if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
+            {
+                ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255;
+            }
 
             //ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;
 

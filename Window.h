@@ -27,6 +27,7 @@ public:
     virtual ~Window();
 
     static void showStatusMessage (const QString & msg);  
+
     
 public slots :
     void renderRayImage ();
@@ -42,8 +43,8 @@ private :
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;
     QString currentDirectory;
-
     GLViewer * viewer;
+    DoubleWidget* nbRayShadow;
 };
 
 #endif // WINDOW_H

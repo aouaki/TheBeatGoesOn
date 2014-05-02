@@ -23,6 +23,7 @@ public:
         //We precompute the calcul of triangles normals
 
         mesh.computeTriangleNormals(trianglesNormals);
+        reflectance=0;
 
     }
     virtual ~Object () {}
@@ -40,6 +41,9 @@ public:
     void updateBoundingBox ();
 
     inline const std::vector<Vec3Df> & getTrianglesNormals () const { return trianglesNormals; }
+
+    inline float getRefl(){return reflectance;}
+    inline void setRefl(float ref){reflectance=ref;}
     
 private:
     Mesh mesh;
@@ -47,6 +51,7 @@ private:
     BoundingBox bbox;
     Vec3Df trans;
     std::vector<Vec3Df> trianglesNormals;
+    float reflectance;
 };
 
 

@@ -63,6 +63,8 @@ Window::~Window () {
 }
 
 void Window::renderRayImage () {
+    RayTracer * ray = RayTracer::getInstance ();
+    ray->setNbRayShadow((int)nbRayShadow->getValue()/1000);
     qglviewer::Camera * cam = viewer->camera ();
     RayTracer * rayTracer = RayTracer::getInstance ();
     qglviewer::Vec p = cam->position ();
@@ -148,7 +150,21 @@ void Window::initControlWidget () {
     previewLayout->addWidget (snapshotButton);
 
     layout->addWidget (previewGroupBox);
-    
+
+    QGroupBox * optionsGroupBox = new QGroupBox ("Options", controlWidget);
+    QVBoxLayout * optionsLayout = new QVBoxLayout (optionsGroupBox);
+    QCheckBox * aaCheckBox = new QCheckBox ("Mirror Effect", optionsGroupBox);
+    connect (aaCheckBox, SIGNAL (toggled (bool)), viewer, SLOT(setMirrorEffect (bool)));
+    optionsLayout->addWidget (aaCheckBox);
+    nbRayShadow = new DoubleWidget(QString("AreaLighting density"), 0.0, 20.0, 1, this);
+    optionsLayout->addWidget(nbRayShadow);
+
+    //On passe l'ption de base à 0
+    RayTracer * ray = RayTracer::getInstance ();
+    ray->changeActMir();
+
+    layout->addWidget (optionsGroupBox);
+
     QGroupBox * rayGroupBox = new QGroupBox ("Ray Tracing", controlWidget);
     QVBoxLayout * rayLayout = new QVBoxLayout (rayGroupBox);
     QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);

@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <cassert>
 #include <string>
+#include "RayTracer.h"
 
 using namespace std;
 
@@ -33,6 +34,12 @@ void GLViewer::setWireframe (bool b) {
     else
         glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
     updateGL ();
+}
+
+void GLViewer::setMirrorEffect(bool b) {
+
+    RayTracer * ray = RayTracer::getInstance ();
+    ray->changeActMir();
 }
 
 void GLViewer::setRenderingMode (RenderingMode m) {

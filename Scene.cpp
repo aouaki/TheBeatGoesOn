@@ -50,6 +50,7 @@ void Scene::buildDefaultScene () {
     groundMesh.loadOFF ("models/ground.off");
     Material groundMat;
     Object ground (groundMesh, groundMat);
+    ground.setRefl(0.8);
     objects.push_back (ground);
 
 

@@ -33,6 +33,9 @@ public:
                    unsigned int screenHeight);
     int getIntersectionPoint(const Vec3Df & camPos, const Vec3Df & dir, Vec3Df & intersectionPoint, Vec3Df & IntersPointNormal);
     Vec3Df Brdf(const Vec3Df & camPos,const Vec3Df & normal,int idObj,const Vec3Df & intersectionPoint);
+    inline void setNbRayShadow(int nbrs){nbRayShadow =nbrs;}
+    inline bool getActMir(){return activeMirror;}
+    inline void changeActMir(){activeMirror=!activeMirror;}
 
 protected:
     inline RayTracer () {}
@@ -40,6 +43,8 @@ protected:
     
 private:
     Vec3Df backgroundColor;
+    int nbRayShadow;
+    bool activeMirror;
 };
 
 
