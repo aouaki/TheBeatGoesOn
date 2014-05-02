@@ -32,9 +32,9 @@ inline int clamp (float f, int inf, int sup) {
 }
 
 Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
-            const Vec3Df & normal,
-            int idObj,
-            const Vec3Df & intersectionPoint){
+                        const Vec3Df & normal,
+                        int idObj,
+                        const Vec3Df & intersectionPoint){
 
     Scene * scene = Scene::getInstance ();
     std::vector<Light> lights = scene->getLights();
@@ -153,12 +153,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
 
     std::cout << "Couleur de la lumiere : " << light.getColor() << std::endl;
 
-    /*const BoundingBox & bbox = scene->getBoundingBox ();
-    const Vec3Df & minBb = bbox.getMin ();
-    const Vec3Df & maxBb = bbox.getMax ();
-    const Vec3Df rangeBb = maxBb - minBb;*/
-
-
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
     for (unsigned int i = 0; i < screenWidth; i++) {
@@ -190,9 +184,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
 
                     if(idObj>=0)
                     {
-                        //Prise en compte des ombre on vérifie qu'il n'y a aucune intersection avec
-                        //un autre triangle entre le point d'intersection et la lumière
-
 
                         tempc += Brdf(camPos, IntersPointNormal, idObj,intersectionPoint)/std::pow(aliaNb-1,2);
                         c=tempc;
