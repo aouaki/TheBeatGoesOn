@@ -69,9 +69,26 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
         Vec3Df IntersPointNormal2;
 
         //Area Lighting
-        int nbrayshadow=1;
+        int nbrayshadow=10;
         float radius=0.1f;
 
+        //Miroir
+        if(idObj==0)
+        {
+            Vec3Df vDir= intersectionPoint-camPos;
+            vDir.normalize();
+            Vec3Df planA = Vec3Df::crossProduct(n, Vec3Df::crossProduct(vDir, n));
+            Vec3Df newDir = Vec3Df::dotProduct(planA, vDir)*planA - Vec3Df::dotProduct(vDir, n)*n;
+            int obj = getIntersectionPoint(intersectionPoint, newDir, intersectionPoint2, IntersPointNormal2);
+            if(obj>-1)
+            {
+                if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
+                {
+                    Vec3Df reflectedColor = Brdf(intersectionPoint,IntersPointNormal2,obj,intersectionPoint2);
+                    ci += (reflectedColor+(((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255)/nbrayshadow;
+                }
+            }
+        }
 
 
         for(int p = 0;p<nbrayshadow;p++)
@@ -90,27 +107,17 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
             lightposbis[1]=light.getPos()[1]+b;
             lightposbis[2]=light.getPos()[2]+c;
 
-            if(idObj==0)
-            {
-                Vec3Df vDir= intersectionPoint-camPos;
-                vDir.normalize();
-                Vec3Df planA = Vec3Df::crossProduct(n, Vec3Df::crossProduct(vDir, n));
-                Vec3Df newDir = Vec3Df::dotProduct(planA, vDir)*planA - Vec3Df::dotProduct(vDir, n)*n;
-                int obj = getIntersectionPoint(intersectionPoint, newDir, intersectionPoint2, IntersPointNormal2);
-                if(obj>-1)
+                if(getIntersectionPoint(intersectionPoint,-intersectionPoint+lightposbis,intersectionPoint2,IntersPointNormal2)==-1)
                 {
-                    Vec3Df reflectedColor = Brdf(intersectionPoint,IntersPointNormal2,obj,intersectionPoint2);
-                    ci += reflectedColor/2;
+                    ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;
                 }
-            }
+         }
 
 
-            ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;
+            //ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;
 
 
-            /*if(getIntersectionPoint(intersectionPoint,-intersectionPoint+lightposbis,intersectionPoint2,IntersPointNormal2)==-1)
-                ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;*/
-        }
+
     }
     return ci;
 }
