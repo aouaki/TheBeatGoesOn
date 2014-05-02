@@ -138,7 +138,6 @@ int RayTracer::getIntersectionPoint(const Vec3Df & camPos,
     bool hasIntersection=false;
     for (unsigned int k = 0; k < scene->getObjects().size (); k++) {
         Object & o = scene->getObjects()[k];
-        //std::cout << o.getTrans()
         Ray ray (camPos-o.getTrans (), dir);
         hasIntersection = ray.intersect (o.getBoundingBox ());
         if (hasIntersection){
@@ -201,7 +200,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
     std::vector<Light> lights = scene->getLights();
     Light light = lights[0];
 
-    std::cout << "Couleur de la lumiere : " << light.getColor() << std::endl;
 
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
