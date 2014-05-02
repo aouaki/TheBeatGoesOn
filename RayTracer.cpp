@@ -69,7 +69,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
         Vec3Df IntersPointNormal2;
 
         //Area Lighting
-        int nbrayshadow=10;
+        int nbrayshadow=1;
         float radius=0.1f;
 
         //Miroir
