@@ -103,11 +103,11 @@ bool KDNode::boxTriangleIntersectionTest(const Vec3Df &A, const Vec3Df &B, const
     //selon y :
     min=std::min(v1[1],std::min(v2[1],v3[1]));
     max=std::max(v1[1],std::min(v2[1],v3[1]));
-    if(min>height/2 || max<-height/2) return true;
+//    if(min>height/2 || max<-height/2) return false;
     //selon z :
     min=std::min(v1[2],std::min(v2[2],v3[2]));
     max=std::max(v1[2],std::min(v2[2],v3[2]));
-    if(min>length/2 || max<-length/2) return false;
+//    if(min>length/2 || max<-length/2) return false;
 
     //2EME SERIE DE TESTS
     Vec3Df e0 = v2 - v1;
@@ -267,5 +267,5 @@ bool KDNode::boxTriangleIntersectionTest(const Vec3Df &A, const Vec3Df &B, const
 
 
     //si tous tests n'ont rien retourné
-    return false;
+    return true;
 }
