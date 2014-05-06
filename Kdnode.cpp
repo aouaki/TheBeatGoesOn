@@ -22,11 +22,10 @@ inline float KDNode::findMedianSample(std::vector<unsigned> & triangles, int dim
     std::vector<float> positions;
 //    positions.resize(triangles.size());
     const Mesh & mesh = o.getMesh();
-    for (unsigned idT=0; idT<triangles.size(); idT++) {
-        unsigned t = triangles[idT];
+    for (std::vector<unsigned>::iterator idTri = triangles.begin() ; idTri != triangles.end(); ++idTri) {
 
         for(unsigned i = 0 ; i<3 ; i++) {
-            unsigned v = mesh.getTriangles()[t].getVertex(i);
+            unsigned v = mesh.getTriangles()[*idTri].getVertex(i);
             Vec3Df p = mesh.getVertices()[v].getPos();
             positions.push_back( p[dim] );
             }
@@ -42,23 +41,22 @@ inline float KDNode::findMedianSample(std::vector<unsigned> & triangles, int dim
 
 void KDNode::splitTriangles(std::vector <unsigned> &leftTri, std::vector <unsigned> &rightTri, BoundingBox &leftBox, BoundingBox &rightBox){
     const Mesh & mesh = o.getMesh();
-    for(unsigned idT=0; idT<triangles.size(); idT++) {
-        unsigned t = triangles[idT];
+    for(std::vector<unsigned>::iterator idTri = triangles.begin() ; idTri != triangles.end(); ++idTri) {
         bool isInLeft = false;
         bool isInRight = false;
 
-        unsigned v = mesh.getTriangles()[t].getVertex(0);
+        unsigned v = mesh.getTriangles()[*idTri].getVertex(0);
         const Vec3Df & vertex0 = mesh.getVertices()[v].getPos();
-        v = mesh.getTriangles()[t].getVertex(1);
+        v = mesh.getTriangles()[*idTri].getVertex(1);
         const Vec3Df & vertex1 = mesh.getVertices()[v].getPos();
-        v = mesh.getTriangles()[t].getVertex(2);
+        v = mesh.getTriangles()[*idTri].getVertex(2);
         const Vec3Df & vertex2 = mesh.getVertices()[v].getPos();
         isInLeft = boxTriangleIntersectionTest(vertex0, vertex1, vertex2, leftBox);
         isInRight = boxTriangleIntersectionTest(vertex0, vertex1, vertex2, rightBox);
         if(isInLeft)
-            leftTri.push_back(t);
+            leftTri.push_back(*idTri);
         if(isInRight)
-            rightTri.push_back(t);
+            rightTri.push_back(*idTri);
     }
 }
 
@@ -103,11 +101,11 @@ bool KDNode::boxTriangleIntersectionTest(const Vec3Df &A, const Vec3Df &B, const
     //selon y :
     min=std::min(v1[1],std::min(v2[1],v3[1]));
     max=std::max(v1[1],std::min(v2[1],v3[1]));
-//    if(min>height/2 || max<-height/2) return false;
+    if(min>height/2 || max<-height/2) return false;
     //selon z :
     min=std::min(v1[2],std::min(v2[2],v3[2]));
     max=std::max(v1[2],std::min(v2[2],v3[2]));
-//    if(min>length/2 || max<-length/2) return false;
+    if(min>length/2 || max<-length/2) return false;
 
     //2EME SERIE DE TESTS
     Vec3Df e0 = v2 - v1;
@@ -267,5 +265,4 @@ bool KDNode::boxTriangleIntersectionTest(const Vec3Df &A, const Vec3Df &B, const
 
 
     //si tous tests n'ont rien retourné
-    return true;
 }
