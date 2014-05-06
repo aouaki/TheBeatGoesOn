@@ -44,6 +44,7 @@ public:
 
     inline float getRefl(){return reflectance;}
     inline void setRefl(float ref){reflectance=ref;}
+    void resize(float coef);
     
 private:
     Mesh mesh;
