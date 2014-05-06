@@ -156,7 +156,7 @@ void Window::initControlWidget () {
     QCheckBox * aaCheckBox = new QCheckBox ("Mirror Effect", optionsGroupBox);
     connect (aaCheckBox, SIGNAL (toggled (bool)), viewer, SLOT(setMirrorEffect (bool)));
     optionsLayout->addWidget (aaCheckBox);
-    nbRayShadow = new DoubleWidget(QString("AreaLighting density"), 0.0, 20.0, 1, this);
+    nbRayShadow = new DoubleWidget(QString("AreaLighting density"), 0.0, 100.0, 1, this);
     optionsLayout->addWidget(nbRayShadow);
 
     //On passe l'ption de base à 0

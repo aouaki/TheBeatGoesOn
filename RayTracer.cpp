@@ -88,7 +88,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
             }
         }
 
-        if(scene->getObjects()[idObj].getRefl()<1.0)
+        if(scene->getObjects()[idObj].getRefl()<1.0 || true)
         {
             if(nbRayShadow>0)
                 for(int p = 0;p<nbRayShadow;p++)
@@ -113,7 +113,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
                     }
                 }
             else
-                if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
+                if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1 || true)
                 {
                     ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255;
                 }
