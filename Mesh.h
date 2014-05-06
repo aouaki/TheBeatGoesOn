@@ -47,11 +47,11 @@ public:
         Vec3Df normalizedAxis = axis;
         normalizedAxis.normalize();
 
-        for (Vertex & v : vertices) {
+        /*for (Vertex & v : vertices) {
             v.setPos(v.getPos().rotate(normalizedAxis, angle));
         }
 
-        recomputeSmoothVertexNormals (0);
+        recomputeSmoothVertexNormals (0);*/
     }
 
     void renderGL (bool flat) const;

@@ -113,7 +113,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
                     }
                 }
             else
-                if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1 || true)
+                if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
                 {
                     ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255;
                 }
@@ -174,7 +174,7 @@ int RayTracer::getIntersectionPoint(const Vec3Df & camPos,
                                 vertices[triangle.getVertex(0)].getPos()*coefB[2]
                                 +vertices[triangle.getVertex(1)].getPos()*coefB[0]
                                 +vertices[triangle.getVertex(2)].getPos()*coefB[1];
-                        intersectionPoint = intersectionPoint/(coefB[0]+coefB[1]+coefB[2]);
+                        intersectionPoint = (intersectionPoint+o.getTrans())/(coefB[0]+coefB[1]+coefB[2]);
 
                         smallestIntersectionDistance = intersectionDistance;
 
