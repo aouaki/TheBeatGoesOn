@@ -50,20 +50,46 @@ void Scene::buildDefaultScene () {
     groundMesh.loadOFF ("models/ground.off");
     Material groundMat;
     Object ground (groundMesh, groundMat);
-    ground.setRefl(0.8);
+
     objects.push_back (ground);
 
+    Mesh wallMesh;
+    wallMesh.loadOFF ("models/wall.off");
+    Material wallMat (1.f, 1.f, Vec3Df (0.6f, 0.4f, 0.4f));
+    Object wall (wallMesh, wallMat);
+    wall.setTrans (Vec3Df (-1.9f, 0.0f, 1.5f));
+    objects.push_back (wall);
 
-    /*
-    Mesh groundMesh2;
-    groundMesh2.loadOFF ("models/ground.off");
-    Material groundMat2;
-    Object ground2 (groundMesh2, groundMat2);
-    ground2.setTrans (Vec3Df (0.f, 0.f, 0.1f));
-    objects.push_back (ground2);*/
+    /*Mesh wallMesh2;
+    wallMesh2.loadOFF ("models/wall.off");
+    wallMesh2.rotate({0,0,1}, -M_PI/2);
+    Material wallMat2;
+    Object wall2 (wallMesh2, wallMat2);
+    wall2.setTrans (Vec3Df (0.f, 1.9f, 1.5f));
+    objects.push_back (wall2);
+
+
+    Mesh wallMesh3;
+    wallMesh3.loadOFF ("models/wall.off");
+    wallMesh3.rotate({0,0,1}, -M_PI/2);
+    Material wallMat3;
+    Object wall3 (wallMesh3, wallMat3);
+    wall3.setTrans (Vec3Df (0.f, -1.9f, 1.5f));
+    objects.push_back (wall3);*/
+
+    Mesh ballMesh;
+    ballMesh.loadOFF ("models/facet_ball_2.off");
+    ballMesh.rotate({0,0,1}, M_PI/2);
+    Material ballMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
+    Object ball (ballMesh, ballMat);
+    ball.setRefl(1.0);
+    ball.setTrans (Vec3Df (1.f, 0.5f, 1.0f));
+    ball.resize(3.0);
+    objects.push_back (ball);
 
     Mesh ramMesh;
     ramMesh.loadOFF ("models/ram.off");
+    ramMesh.rotate({0,0,1}, M_PI/2);
     Material ramMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
     Object ram (ramMesh, ramMat);
     ram.setTrans (Vec3Df (1.f, 0.5f, 0.f));
@@ -82,7 +108,7 @@ void Scene::buildDefaultScene () {
     garg.setTrans (Vec3Df (-1.f, 1.0f, 0.1f));
     objects.push_back (garg);
     */
-    Light l (Vec3Df (3.0f, 3.0f, 3.0f), Vec3Df (1.0f, 1.0f, 1.0f), 1.0f);
+    Light l (Vec3Df (3.0f, 0.0f, 3.0f), Vec3Df (1.0f, 1.0f, 1.0f), 1.f);
     //Light l2 (Vec3Df (3.0f, -3.0f, 3.0f), Vec3Df (1.0f, 1.0f, 1.0f), 1.0f);
     lights.push_back (l);
     //lights.push_back (l2);

@@ -243,6 +243,16 @@ public:
         return (u * (1.0f - alpha) + v * alpha);
     }
 
+    inline Vec3D rotate(const Vec3D &axis, const T &angle) const {
+        Vec3D<T> result;
+        T cosTheta = (T)cos(angle);
+        T sinTheta = (T)sin(angle);
+
+        result = (*this) * cosTheta + crossProduct(axis, *this) * sinTheta + axis * (dotProduct(axis, *this)) * ((T)(1) - cosTheta);
+
+        return result;
+    }
+
     // cartesion to polar coordinates
     // result:
     // [0] = length

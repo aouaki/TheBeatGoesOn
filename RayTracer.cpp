@@ -35,9 +35,9 @@ inline int clamp (float f, int inf, int sup) {
 }
 
 Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
-                        const Vec3Df & normal,
-                        int idObj,
-                        const Vec3Df & intersectionPoint){
+                       const Vec3Df & normal,
+                       int idObj,
+                       const Vec3Df & intersectionPoint){
 
     Scene * scene = Scene::getInstance ();
     std::vector<Light> lights = scene->getLights();
@@ -88,36 +88,38 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
             }
         }
 
+        if(scene->getObjects()[idObj].getRefl()<1.0)
+        {
+            if(nbRayShadow>0)
+                for(int p = 0;p<nbRayShadow;p++)
+                {
+                    float a = ((float)std::rand())/((float)RAND_MAX);
+                    float b = ((float)std::rand())/((float)RAND_MAX);
+                    float c = ((float)std::rand())/((float)RAND_MAX);
 
-        if(nbRayShadow>0)
-            for(int p = 0;p<nbRayShadow;p++)
-            {
-                float a = ((float)std::rand())/((float)RAND_MAX);
-                float b = ((float)std::rand())/((float)RAND_MAX);
-                float c = ((float)std::rand())/((float)RAND_MAX);
+                    float sum = a+b+c;
+                    a=a/sum*radius;
+                    b=b/sum*radius;
+                    c=c/sum*radius;
+                    Vec3Df lightposbis;
 
-                float sum = a+b+c;
-                a=a/sum*radius;
-                b=b/sum*radius;
-                c=c/sum*radius;
-                Vec3Df lightposbis;
-
-                lightposbis[0]=light.getPos()[0]+a;
-                lightposbis[1]=light.getPos()[1]+b;
-                lightposbis[2]=light.getPos()[2]+c;
+                    lightposbis[0]=light.getPos()[0]+a;
+                    lightposbis[1]=light.getPos()[1]+b;
+                    lightposbis[2]=light.getPos()[2]+c;
 
                     if(getIntersectionPoint(intersectionPoint,-intersectionPoint+lightposbis,intersectionPoint2,IntersPointNormal2)==-1)
                     {
                         ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbRayShadow;
                     }
-             }
-        else
-            if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
-            {
-                ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255;
-            }
+                }
+            else
+                if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
+                {
+                    ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255;
+                }
 
             //ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;
+        }
 
 
 
