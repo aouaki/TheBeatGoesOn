@@ -14,6 +14,7 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "BoundingBox.h"
+#include "Kdnode.h"
 
 class Object {
 public:
@@ -21,9 +22,9 @@ public:
     inline Object (const Mesh & mesh, const Material & mat) : mesh (mesh), mat (mat) {
         updateBoundingBox ();
         //We precompute the calcul of triangles normals
-
         mesh.computeTriangleNormals(trianglesNormals);
-
+        //Construction of the KD-Tree
+        tree = new KDNode(*this);
     }
     virtual ~Object () {}
 
@@ -40,6 +41,7 @@ public:
     void updateBoundingBox ();
 
     inline const std::vector<Vec3Df> & getTrianglesNormals () const { return trianglesNormals; }
+    inline const KDNode * getTree () const { return tree;}
     
 private:
     Mesh mesh;
@@ -47,6 +49,7 @@ private:
     BoundingBox bbox;
     Vec3Df trans;
     std::vector<Vec3Df> trianglesNormals;
+    KDNode *tree;
 };
 
 

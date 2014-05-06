@@ -6,12 +6,9 @@
 // *********************************************************
 
 #include "RayTracer.h"
-#include "Ray.h"
-#include "Scene.h"
 #include <QProgressDialog>
 #include "math.h"
 #include <cstdlib>
-
 #include <omp.h>
 
 static RayTracer * instance = NULL;
@@ -144,38 +141,35 @@ int RayTracer::getIntersectionPoint(const Vec3Df & camPos,
             Mesh mesh = o.getMesh();
             std::vector<Triangle> tabTriangle = mesh.getTriangles();
             std::vector<Vertex> vertices = mesh.getVertices();
-            for(unsigned int m =0 ; m<tabTriangle.size() ; m++){
-                Triangle triangle = tabTriangle[m];
-                Vec3Df normal = o.getTrianglesNormals()[m]; //Pecomputed
-                Vec3Df vertex1 (vertices[triangle.getVertex(0)].getPos());
-                Vec3Df vertex2 (vertices[triangle.getVertex(1)].getPos());
-                Vec3Df vertex3 (vertices[triangle.getVertex(2)].getPos());
-                float intersectionDistance;
-                float coefB[3]; //The three barycentric coefs of the intersection point
-                bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, coefB, intersectionDistance);
+            std::vector<Vec3Df> normals = o.getTrianglesNormals(); //Precomputed
+            float intersectionDistance;
+            float coefB[3]; //The three barycentric coefs of the intersection point
+            unsigned idTriangle;
+            bool hasIntersection = searchNode (o.getTree(), ray, tabTriangle, vertices, normals, intersectionDistance, idTriangle, coefB);
 
-                if (hasIntersection) {
+            if (hasIntersection) {
 
-                    if (intersectionDistance < smallestIntersectionDistance) {
+                if (intersectionDistance < smallestIntersectionDistance) {
 
-                        IntersPointNormal =
-                                vertices[triangle.getVertex(0)].getNormal()*coefB[2]
-                                +vertices[triangle.getVertex(1)].getNormal()*coefB[0]
-                                +vertices[triangle.getVertex(2)].getNormal()*coefB[1];
-                        IntersPointNormal = IntersPointNormal/(coefB[0]+coefB[1]+coefB[2]);
+                    Triangle triangle = tabTriangle[idTriangle];
 
-                        intersectionPoint =
-                                vertices[triangle.getVertex(0)].getPos()*coefB[2]
-                                +vertices[triangle.getVertex(1)].getPos()*coefB[0]
-                                +vertices[triangle.getVertex(2)].getPos()*coefB[1];
-                        intersectionPoint = intersectionPoint/(coefB[0]+coefB[1]+coefB[2]);
+                    IntersPointNormal =
+                            vertices[triangle.getVertex(0)].getNormal()*coefB[2]
+                            +vertices[triangle.getVertex(1)].getNormal()*coefB[0]
+                            +vertices[triangle.getVertex(2)].getNormal()*coefB[1];
+                    IntersPointNormal = IntersPointNormal/(coefB[0]+coefB[1]+coefB[2]);
 
-                        smallestIntersectionDistance = intersectionDistance;
+                    intersectionPoint =
+                            vertices[triangle.getVertex(0)].getPos()*coefB[2]
+                            +vertices[triangle.getVertex(1)].getPos()*coefB[0]
+                            +vertices[triangle.getVertex(2)].getPos()*coefB[1];
+                    intersectionPoint = intersectionPoint/(coefB[0]+coefB[1]+coefB[2]);
 
-                        idObj=k;
+                    smallestIntersectionDistance = intersectionDistance;
+
+                    idObj=k;
 
 
-                    }
                 }
             }
         }
@@ -187,6 +181,72 @@ int RayTracer::getIntersectionPoint(const Vec3Df & camPos,
 // POINT D'ENTREE DU PROJET.
 // Le code suivant ray trace uniquement la boite englobante de la scene.
 // Il faut remplacer ce code par une veritable raytracer
+
+inline std::vector<KDNode *> RayTracer::order(float & rayDir, KDNode *leftChild, KDNode *rightChild){
+    std::vector<KDNode *> orderedVector;
+    if (rayDir > 0.f) {
+        orderedVector.push_back(leftChild);
+        orderedVector.push_back(rightChild);
+    }
+    else {
+        orderedVector.push_back(rightChild);
+        orderedVector.push_back(leftChild);
+    }
+    return orderedVector;
+}
+
+inline bool RayTracer::searchNode (const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
+    if (node->isLeaf())
+    {
+        return searchLeaf(node, ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
+    }
+    else
+    {
+        return searchSplit(node, ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
+    }
+
+}
+
+inline bool RayTracer::searchSplit(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
+    bool isInFirst= ray.intersect(node->getLeftChild()->bbox);
+    bool isInSecond = ray.intersect(node->getRightChild()->bbox);
+    if (isInFirst && isInSecond) {
+        std::vector<KDNode *> ordered = order( ray.getDirection()[node->getAxis()], node->getLeftChild(), node->getRightChild());
+        bool inFirstNode = searchNode( ordered[0], ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
+        if (inFirstNode)
+            return true;
+        else
+            return searchNode( ordered[1], ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
+    }
+    else if( isInFirst ) {
+        return searchNode( node->getLeftChild(), ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
+    }
+    else if( isInSecond ) {
+        return searchNode( node->getRightChild(), ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
+    }
+    return false;
+}
+
+inline bool RayTracer::searchLeaf(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
+    std::vector<unsigned> triangleList = node->getTriangles();
+
+    for (std::vector<unsigned>::iterator idTri = triangleList.begin() ; idTri != triangleList.end(); ++idTri){
+        Triangle triangle = meshTriangles[*idTri];
+        Vec3Df vertex1 = vertices [triangle.getVertex(0)].getPos();
+        Vec3Df vertex2 = vertices [triangle.getVertex(1)].getPos();
+        Vec3Df vertex3 = vertices [triangle.getVertex(2)].getPos();
+        Vec3Df normal = triangleNormals[*idTri];
+        bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, coefB, intersectionDistance);
+
+        if (hasIntersection) {
+            idTriangle = *idTri;
+            return true;
+        }
+    }
+
+    return false;
+}
+
 QImage RayTracer::render (const Vec3Df & camPos,
                           const Vec3Df & direction,
                           const Vec3Df & upVector,
@@ -199,7 +259,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
     Scene * scene = Scene::getInstance ();
     std::vector<Light> lights = scene->getLights();
     Light light = lights[0];
-
 
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();

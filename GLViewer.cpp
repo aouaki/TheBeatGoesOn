@@ -35,6 +35,11 @@ void GLViewer::setWireframe (bool b) {
     updateGL ();
 }
 
+void GLViewer::setKd (bool b){
+    kdtree = b;
+    updateGL ();
+}
+
 void GLViewer::setRenderingMode (RenderingMode m) {
     renderingMode = m;
     updateGL ();
@@ -124,6 +129,52 @@ void GLViewer::init() {
     showEntireScene ();
 }
 
+void GLViewer::drawTree(const KDNode *node){
+    if(!node->isLeaf()){
+        drawTree(node->getLeftChild());
+        drawTree(node->getRightChild());
+    }
+    else
+        drawNode(node);
+}
+
+void GLViewer::drawNode(const KDNode *t){
+    drawCube(t->bbox.getMin(), t->bbox.getMax());
+}
+
+void GLViewer::drawCube(const Vec3Df min, const Vec3Df max) {
+    glColor3f(0,0,0);
+
+    glBegin(GL_LINES);
+    glVertex3f(min[0], min[1], min[2]);
+    glVertex3f(max[0], min[1], min[2]);
+    glVertex3f(min[0], min[1], min[2]);
+    glVertex3f(min[0], max[1], min[2]);
+    glVertex3f(max[0], max[1], min[2]);
+    glVertex3f(max[0], min[1], min[2]);
+    glVertex3f(max[0], max[1], min[2]);
+    glVertex3f(min[0], max[1], min[2]);
+
+    glVertex3f(min[0], min[1], max[2]);
+    glVertex3f(max[0], min[1], max[2]);
+    glVertex3f(min[0], min[1], max[2]);
+    glVertex3f(min[0], max[1], max[2]);
+    glVertex3f(max[0], max[1], max[2]);
+    glVertex3f(max[0], min[1], max[2]);
+    glVertex3f(max[0], max[1], max[2]);
+    glVertex3f(min[0], max[1], max[2]);
+
+    glVertex3f(min[0], min[1], min[2]);
+    glVertex3f(min[0], min[1], max[2]);
+    glVertex3f(min[0], max[1], min[2]);
+    glVertex3f(min[0], max[1], max[2]);
+    glVertex3f(max[0], max[1], min[2]);
+    glVertex3f(max[0], max[1], max[2]);
+    glVertex3f(max[0], min[1], min[2]);
+    glVertex3f(max[0], min[1], max[2]);
+    glEnd();
+}
+
 void GLViewer::draw () {
     if (displayMode == RayDisplayMode) {
         glDrawPixels (rayImage.width (),
@@ -159,6 +210,10 @@ void GLViewer::draw () {
         glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 128);
         glDisable (GL_COLOR_MATERIAL);
         o.getMesh ().renderGL (renderingMode == Flat);
+        if (kdtree){
+            const KDNode *tree = o.getTree();
+            drawTree(tree);
+        }
         glPopMatrix ();
     }
 }

@@ -117,7 +117,6 @@ bool Ray::intersect (const BoundingBox & bbox) const {
 
 bool Ray::intersectTriangle(const Vec3Df & vertex1, const Vec3Df & vertex2, const Vec3Df & vertex3, Vec3Df & triangleNormal, float coefB[], float & intersectionDistance){
 
-
     Vec3Df e0=vertex2-vertex1;
     Vec3Df e1=vertex3-vertex1;
 
