@@ -35,7 +35,7 @@ public:
     Vec3Df Brdf(const Vec3Df & camPos,const Vec3Df & normal,int idObj,const Vec3Df & intersectionPoint);
     inline void setNbRayShadow(int nbrs){nbRayShadow =nbrs;}
     inline bool getActMir(){return activeMirror;}
-    inline void changeActMir(){activeMirror=!activeMirror;}
+    inline void changeActMir(bool b){activeMirror=b;}
 
 protected:
     inline RayTracer () {}

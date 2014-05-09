@@ -39,7 +39,7 @@ void GLViewer::setWireframe (bool b) {
 void GLViewer::setMirrorEffect(bool b) {
 
     RayTracer * ray = RayTracer::getInstance ();
-    ray->changeActMir();
+    ray->changeActMir(b);
 }
 
 void GLViewer::setRenderingMode (RenderingMode m) {

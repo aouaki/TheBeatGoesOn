@@ -50,15 +50,15 @@ void Scene::buildDefaultScene () {
     groundMesh.loadOFF ("models/ground.off");
     Material groundMat;
     Object ground (groundMesh, groundMat);
-    ground.setRefl(0.8);
+    //ground.setRefl(0.8);
     objects.push_back (ground);
 
-    /*Mesh wallMesh;
+    Mesh wallMesh;
     wallMesh.loadOFF ("models/wall.off");
     Material wallMat (1.f, 1.f, Vec3Df (0.6f, 0.4f, 0.4f));
     Object wall (wallMesh, wallMat);
     wall.setTrans (Vec3Df (-1.9f, 0.0f, 1.5f));
-    objects.push_back (wall);*/
+    objects.push_back (wall);
 
     /*Mesh wallMesh2;
     wallMesh2.loadOFF ("models/wall.off");
@@ -77,14 +77,15 @@ void Scene::buildDefaultScene () {
     wall3.setTrans (Vec3Df (0.f, -1.9f, 1.5f));
     objects.push_back (wall3);*/
 
-    /*Mesh ballMesh;
-    ballMesh.loadOFF ("models/facet_ball.off");
-    Material ballMat (1.f, 1.f, Vec3Df (1.f, 1.f, 1.f));
+    Mesh ballMesh;
+    ballMesh.loadOFF ("models/facet_ball_2.off");
+    Material ballMat (1.5f, 2.f, Vec3Df (0.5f, 0.5f, 0.5f));
     Object ball (ballMesh, ballMat);
     ball.setRefl(1.0);
-    //ball.setTrans (Vec3Df (0.0f, 0.0f, 2.0f));
+    ball.setTrans (Vec3Df (0.0f, 0.0f, 2.0f));
+    ball.setSmooth(true);
     ball.resize(3.0);
-    objects.push_back (ball);*/
+    objects.push_back (ball);
 
     Mesh ramMesh;
     ramMesh.loadOFF ("models/ram.off");
@@ -92,6 +93,7 @@ void Scene::buildDefaultScene () {
     Material ramMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
     Object ram (ramMesh, ramMat);
     ram.setTrans (Vec3Df (1.f, 0.5f, 0.f));
+    //ram.resize(100.0);
     objects.push_back (ram);
 
     /*Mesh rhinoMesh;

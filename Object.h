@@ -17,13 +17,14 @@
 
 class Object {
 public:
-    inline Object () {}
+    inline Object () {smooth = false;}
     inline Object (const Mesh & mesh, const Material & mat) : mesh (mesh), mat (mat) {
         updateBoundingBox ();
         //We precompute the calcul of triangles normals
 
         mesh.computeTriangleNormals(trianglesNormals);
         reflectance=0;
+        smooth = false;
 
     }
     virtual ~Object () {}
@@ -44,6 +45,10 @@ public:
 
     inline float getRefl(){return reflectance;}
     inline void setRefl(float ref){reflectance=ref;}
+
+    inline bool getSmooth(){return smooth;}
+    inline void setSmooth(bool b){smooth = b;}
+
     void resize(float coef);
     
 private:
@@ -53,6 +58,7 @@ private:
     Vec3Df trans;
     std::vector<Vec3Df> trianglesNormals;
     float reflectance;
+    bool smooth; //define if brdf should interpolate the normals
 };
 
 

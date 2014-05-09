@@ -161,7 +161,7 @@ void Window::initControlWidget () {
 
     //On passe l'ption de base à 0
     RayTracer * ray = RayTracer::getInstance ();
-    ray->changeActMir();
+    ray->changeActMir(false);
 
     layout->addWidget (optionsGroupBox);
 

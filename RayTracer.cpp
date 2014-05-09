@@ -164,11 +164,16 @@ int RayTracer::getIntersectionPoint(const Vec3Df & camPos,
 
                     if (intersectionDistance < smallestIntersectionDistance) {
 
-                        IntersPointNormal =
-                                vertices[triangle.getVertex(0)].getNormal()*coefB[2]
-                                +vertices[triangle.getVertex(1)].getNormal()*coefB[0]
-                                +vertices[triangle.getVertex(2)].getNormal()*coefB[1];
-                        IntersPointNormal = IntersPointNormal/(coefB[0]+coefB[1]+coefB[2]);
+                        if(o.getSmooth()) IntersPointNormal=normal;
+                        else
+                        {
+                            IntersPointNormal =
+                                    vertices[triangle.getVertex(0)].getNormal()*coefB[2]
+                                    +vertices[triangle.getVertex(1)].getNormal()*coefB[0]
+                                    +vertices[triangle.getVertex(2)].getNormal()*coefB[1];
+                            IntersPointNormal = IntersPointNormal/(coefB[0]+coefB[1]+coefB[2]);
+                        }
+
 
                         intersectionPoint =
                                 vertices[triangle.getVertex(0)].getPos()*coefB[2]
