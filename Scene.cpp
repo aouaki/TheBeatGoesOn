@@ -46,7 +46,6 @@ void Scene::updateBoundingBox () {
 //Calcul l'ambient occlusion
 void Scene::computeAO(int nbRay, float maxDist)
 {
-    std::cout << "Starting to compute AO" << std::endl;
     for(int i =0;i<objects.size();i++)
     {
         Object & o = objects[i];
@@ -54,7 +53,6 @@ void Scene::computeAO(int nbRay, float maxDist)
         std::vector<Vertex> vertices = mesh.getVertices();
         int vertSize =vertices.size();
 
-        std::cout << "Starting to compute AO of object n°" << i << std::endl;
 
         for(int j=0;j<vertSize;j++)
         {
@@ -91,7 +89,6 @@ void Scene::computeAO(int nbRay, float maxDist)
 
             o.getMesh().getVertices()[j].setOcc((float)touched/(float)nbRay);
 
-            std::cout << float(j)/float(vertSize)*100 << "% with an AO of " << (float)touched/(float)nbRay << std::endl;
         }
     }
 }

@@ -77,7 +77,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
             Vec3Df planA = Vec3Df::crossProduct(n, Vec3Df::crossProduct(vDir, n));
             Vec3Df newDir = Vec3Df::dotProduct(planA, vDir)*planA - Vec3Df::dotProduct(vDir, n)*n;
             float occ;
-            int obj = getIntersectionPoint(intersectionPoint, newDir, intersectionPoint2, IntersPointNormal2,occ);
+            int obj = getIntersectionPoint(intersectionPoint, newDir, intersectionPoint2, IntersPointNormal2, occ);
             if(obj>-1)
             {
 
@@ -135,7 +135,6 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
 
     }
 
-    //std::cout << "pixel color = " << ci*(1.-occlusion) << " (AO = " << 1.-occlusion << ")" << std::endl;
     if(activePreAO) return ci*(1.f-occlusion);
     else return ci;
 }
@@ -206,7 +205,6 @@ int RayTracer::getIntersectionPoint(const Vec3Df & camPos,
                                 +o.getMesh().getVertices()[triangle.getVertex(1)].getOcc()*coefB[0]
                                 +o.getMesh().getVertices()[triangle.getVertex(2)].getOcc()*coefB[1];
                         occlusion = occlusion/(coefB[0]+coefB[1]+coefB[2]);
-                        //std::cout << "occlusion = " << occlusion << std::endl;
 
                         intersectionPoint =
                                 vertices[triangle.getVertex(0)].getPos()*coefB[2]
@@ -279,21 +277,30 @@ inline bool RayTracer::searchSplit(const KDNode *node, Ray &ray, std::vector <Tr
 inline bool RayTracer::searchLeaf(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
     std::vector<unsigned> triangleList = node->getTriangles();
 
+    float smallest = 10e8;
+    bool found = false;
     for (std::vector<unsigned>::iterator idTri = triangleList.begin() ; idTri != triangleList.end(); ++idTri){
         Triangle triangle = meshTriangles[*idTri];
         Vec3Df vertex1 = vertices [triangle.getVertex(0)].getPos();
         Vec3Df vertex2 = vertices [triangle.getVertex(1)].getPos();
         Vec3Df vertex3 = vertices [triangle.getVertex(2)].getPos();
         Vec3Df normal = triangleNormals[*idTri];
-        bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, coefB, intersectionDistance);
+        float coefBTemp[3];
+        bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, coefBTemp, intersectionDistance);
 
-        if (hasIntersection) {
+        if (hasIntersection && intersectionDistance < smallest) {
+            coefB[0]=coefBTemp[0];
+            coefB[1]=coefBTemp[1];
+            coefB[2]=coefBTemp[2];
+            found = true;
             idTriangle = *idTri;
-            return true;
+            smallest = intersectionDistance;
         }
     }
-
-    return false;
+    if (found)
+        return true;
+    if (!found)
+        return false;
 }
 
 QImage RayTracer::render (const Vec3Df & camPos,
