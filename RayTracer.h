@@ -37,6 +37,8 @@ public:
     Vec3Df Brdf(const Vec3Df & camPos,const Vec3Df & normal,int idObj,const Vec3Df & intersectionPoint, float occlusion, int PTRays);
     inline void setNbRayShadow(int nbrs){nbRayShadow =nbrs;}
     inline void setNbRayAO(int nbrs){nbRayAO =nbrs;}
+    inline void setNbRayPT(int nbrs){nbRayPT =nbrs;}
+    inline void setDepthPT(int nbrs){depthPT =nbrs;}
     inline bool getActMir(){return activeMirror;}
     inline void changeActMir(bool b){activeMirror=b;}
     inline void setActShadow(bool b){activeShadow =b;}
@@ -47,6 +49,9 @@ public:
     inline bool getActPreAO(){return activePreAO;}
     inline void setActAA(bool b){activeAA =b;}
     inline bool getActAA(){return activeAA;}
+    inline void setActPT(bool b){activePT =b;}
+    inline bool getActPT(){return activePT;}
+
 
 protected:
     inline RayTracer () {}
@@ -60,7 +65,10 @@ private:
     bool activePreAO;
     bool activeAO;
     bool activeAA;
+    bool activePT;
     int nbRayAO;
+    int nbRayPT;
+    int depthPT;
 };
 
 

@@ -66,6 +66,8 @@ void Window::renderRayImage () {
     RayTracer * ray = RayTracer::getInstance ();
     ray->setNbRayShadow((int)nbRayShadow->getValue()/1000);
     ray->setNbRayAO((int)nbRayAO->getValue()/1000);
+    ray->setNbRayPT((int)nbRayPT->getValue()/1000);
+    ray->setDepthPT((int)depthPT->getValue()/1000);
     qglviewer::Camera * cam = viewer->camera ();
     RayTracer * rayTracer = RayTracer::getInstance ();
     qglviewer::Vec p = cam->position ();
@@ -165,6 +167,13 @@ void Window::initControlWidget () {
     optionsLayout->addWidget (sdCheckBox);
     nbRayShadow = new DoubleWidget(QString("AreaLighting density"), 0.0, 100.0, 0, this);
     optionsLayout->addWidget(nbRayShadow);
+    QCheckBox * ptCheckBox = new QCheckBox ("Activate shadows", optionsGroupBox);
+    connect (ptCheckBox, SIGNAL (toggled (bool)), viewer, SLOT(setPathTracerEffect (bool)));
+    optionsLayout->addWidget (ptCheckBox);
+    nbRayPT = new DoubleWidget(QString("Nb PathTracer rays"), 0.0, 100.0, 0, this);
+    optionsLayout->addWidget(nbRayPT);
+    depthPT = new DoubleWidget(QString("Depth PathTracer"), 1.0, 5.0, 1., this);
+    optionsLayout->addWidget(depthPT);
 
     nbRayAO = new DoubleWidget(QString("AO density"), 0.0, 100.0, 0, this);
     optionsLayout->addWidget(nbRayAO);
@@ -175,6 +184,7 @@ void Window::initControlWidget () {
     ray->setActShadow(false);
     ray->setActPreAO(true);
     ray->setActAA(false);
+    ray->setActPT(false);
 
     layout->addWidget (optionsGroupBox);
 

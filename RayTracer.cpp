@@ -100,12 +100,10 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
         //PathTracing
         if(true)
         {
-            if(PTRays < 1)
+            if(PTRays < depthPT)
             {
 
-                int nbRayRT = 10;
-
-                for(int h=0; h< nbRayRT; h++)
+                for(int h=0; h< nbRayPT; h++)
                 {
                     Vec3Df n1;
                     Vec3Df n2;
@@ -122,7 +120,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
 
                     int objPT = getIntersectionPoint(intersectionPoint,dir,intersectionPoint2,IntersPointNormal2);
 
-                    ci+=Brdf(intersectionPoint,IntersPointNormal2,objPT,intersectionPoint2,0.,PTRays+1)/nbRayRT;
+                    ci+=Brdf(intersectionPoint,IntersPointNormal2,objPT,intersectionPoint2,0.,PTRays+1)/nbRayPT;
                 }
 
 

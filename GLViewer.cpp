@@ -54,6 +54,12 @@ void GLViewer::setShadowEffect(bool b) {
     ray->setActShadow(b);
 }
 
+void GLViewer::setRayTracerEffect(bool b) {
+
+    RayTracer * ray = RayTracer::getInstance ();
+    ray->setActPT(b);
+}
+
 void GLViewer::setRenderingMode (RenderingMode m) {
     renderingMode = m;
     updateGL ();
