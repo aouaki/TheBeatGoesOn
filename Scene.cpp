@@ -6,6 +6,7 @@
 // *********************************************************
 
 #include "Scene.h"
+#include "RayTracer.h"
 
 using namespace std;
 
@@ -42,6 +43,59 @@ void Scene::updateBoundingBox () {
     }
 }
 
+//Calcul l'ambient occlusion
+void Scene::computeAO(int nbRay, float maxDist)
+{
+    std::cout << "Starting to compute AO" << std::endl;
+    for(int i =0;i<objects.size();i++)
+    {
+        Object & o = objects[i];
+        Mesh mesh = o.getMesh();
+        std::vector<Vertex> vertices = mesh.getVertices();
+        int vertSize =vertices.size();
+
+        std::cout << "Starting to compute AO of object n°" << i << std::endl;
+
+        for(int j=0;j<vertSize;j++)
+        {
+            int touched=0;
+            for(int r=0;r<nbRay;r++)
+            {
+                Vec3Df normal = vertices[j].getNormal();
+                Vec3Df pos = vertices[j].getPos();
+
+                Vec3Df n1;
+                Vec3Df n2;
+
+                normal.getTwoOrthogonals(n1,n2);
+
+                float a = -((float)std::rand())/((float)RAND_MAX);
+                float b = ((float)std::rand())/((float)RAND_MAX)*2.-1.;
+                float c = ((float)std::rand())/((float)RAND_MAX)*2.-1.;
+
+                Vec3Df dir = normal*a+n1*b+n2*c;
+                dir.normalize();
+                Vec3Df intersectionPoint2;
+                Vec3Df IntersPointNormal2;
+
+                RayTracer * rt = RayTracer::getInstance();
+                int hasIn = rt->getIntersectionPoint(pos,dir,intersectionPoint2,IntersPointNormal2);
+
+                if(hasIn)
+                    if(Vec3Df::distance(pos,intersectionPoint2) < maxDist)
+                        touched++;
+
+
+
+            }
+
+            o.getMesh().getVertices()[j].setOcc((float)touched/(float)nbRay);
+
+            std::cout << float(j)/float(vertSize)*100 << "% with an AO of " << (float)touched/(float)nbRay << std::endl;
+        }
+    }
+}
+
 // Changer ce code pour creer des scenes originales
 void Scene::buildDefaultScene () {
 
@@ -50,7 +104,7 @@ void Scene::buildDefaultScene () {
     groundMesh.loadOFF ("models/ground.off");
     Material groundMat;
     Object ground (groundMesh, groundMat);
-    //ground.setRefl(0.8);
+    ground.setRefl(0.4);
     objects.push_back (ground);
 
     Mesh wallMesh;
@@ -58,6 +112,7 @@ void Scene::buildDefaultScene () {
     Material wallMat (1.f, 1.f, Vec3Df (0.6f, 0.4f, 0.4f));
     Object wall (wallMesh, wallMat);
     wall.setTrans (Vec3Df (-1.9f, 0.0f, 1.5f));
+    //wall.setRefl(1.);
     objects.push_back (wall);
 
     /*Mesh wallMesh2;
@@ -77,7 +132,7 @@ void Scene::buildDefaultScene () {
     wall3.setTrans (Vec3Df (0.f, -1.9f, 1.5f));
     objects.push_back (wall3);*/
 
-    Mesh ballMesh;
+    /*Mesh ballMesh;
     ballMesh.loadOFF ("models/facet_ball_2.off");
     Material ballMat (1.5f, 2.f, Vec3Df (0.5f, 0.5f, 0.5f));
     Object ball (ballMesh, ballMat);
@@ -85,7 +140,7 @@ void Scene::buildDefaultScene () {
     ball.setTrans (Vec3Df (0.0f, 0.0f, 2.0f));
     ball.setSmooth(true);
     ball.resize(3.0);
-    objects.push_back (ball);
+    objects.push_back (ball);*/
 
     Mesh ramMesh;
     ramMesh.loadOFF ("models/ram.off");
@@ -113,4 +168,5 @@ void Scene::buildDefaultScene () {
     //Light l2 (Vec3Df (3.0f, -3.0f, 3.0f), Vec3Df (1.0f, 1.0f, 1.0f), 1.0f);
     lights.push_back (l);
     //lights.push_back (l2);
+    //computeAO(2,2.);
 }

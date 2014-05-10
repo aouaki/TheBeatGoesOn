@@ -47,7 +47,9 @@ public slots :
     void setDisplayMode (int m) { setRenderingMode (static_cast<DisplayMode>(m)); }
     void setRayImage (const QImage & image);
     void setMirrorEffect(bool b);
-    
+    void setAAEffect(bool b);
+    void setShadowEffect(bool b);
+
 protected :
     void init();
     void draw ();

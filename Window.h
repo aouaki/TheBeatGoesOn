@@ -45,6 +45,7 @@ private :
     QString currentDirectory;
     GLViewer * viewer;
     DoubleWidget* nbRayShadow;
+    DoubleWidget* nbRayAO;
 };
 
 #endif // WINDOW_H

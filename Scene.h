@@ -29,6 +29,8 @@ public:
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
 
+    void computeAO(int nbRay, float maxDist);
+
     
 protected:
     Scene ();

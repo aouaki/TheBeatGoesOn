@@ -42,6 +42,18 @@ void GLViewer::setMirrorEffect(bool b) {
     ray->changeActMir(b);
 }
 
+void GLViewer::setAAEffect(bool b) {
+
+    RayTracer * ray = RayTracer::getInstance ();
+    ray->setActAA(b);
+}
+
+void GLViewer::setShadowEffect(bool b) {
+
+    RayTracer * ray = RayTracer::getInstance ();
+    ray->setActShadow(b);
+}
+
 void GLViewer::setRenderingMode (RenderingMode m) {
     renderingMode = m;
     updateGL ();
