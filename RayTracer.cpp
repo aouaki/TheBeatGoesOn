@@ -242,7 +242,7 @@ inline std::vector<KDNode *> RayTracer::order(float & rayDir, KDNode *leftChild,
     return orderedVector;
 }
 
-inline bool RayTracer::searchNode (const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
+inline bool RayTracer::searchNode (const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> &triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
     if (node->isLeaf())
     {
         return searchLeaf(node, ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
@@ -254,7 +254,7 @@ inline bool RayTracer::searchNode (const KDNode *node, Ray &ray, std::vector <Tr
 
 }
 
-inline bool RayTracer::searchSplit(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
+inline bool RayTracer::searchSplit(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> &triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
     bool isInFirst= ray.intersect(node->getLeftChild()->bbox);
     bool isInSecond = ray.intersect(node->getRightChild()->bbox);
     if (isInFirst && isInSecond) {
@@ -274,7 +274,7 @@ inline bool RayTracer::searchSplit(const KDNode *node, Ray &ray, std::vector <Tr
     return false;
 }
 
-inline bool RayTracer::searchLeaf(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
+inline bool RayTracer::searchLeaf(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> &triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
     std::vector<unsigned> triangleList = node->getTriangles();
 
     float smallest = 10e8;
