@@ -34,7 +34,7 @@ public:
     int getIntersectionPoint(const Vec3Df & camPos, const Vec3Df & dir, Vec3Df & intersectionPoint, Vec3Df & IntersPointNormal, float &occlusion);
     int getIntersectionPoint(const Vec3Df & camPos, const Vec3Df & dir, Vec3Df & intersectionPoint, Vec3Df & IntersPointNormal);
 
-    Vec3Df Brdf(const Vec3Df & camPos,const Vec3Df & normal,int idObj,const Vec3Df & intersectionPoint, float occlusion);
+    Vec3Df Brdf(const Vec3Df & camPos,const Vec3Df & normal,int idObj,const Vec3Df & intersectionPoint, float occlusion, int PTRays);
     inline void setNbRayShadow(int nbrs){nbRayShadow =nbrs;}
     inline void setNbRayAO(int nbrs){nbRayAO =nbrs;}
     inline bool getActMir(){return activeMirror;}
