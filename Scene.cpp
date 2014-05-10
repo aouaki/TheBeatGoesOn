@@ -47,7 +47,7 @@ void Scene::updateBoundingBox () {
 void Scene::computeAO(int nbRay, float maxDist)
 {
     std::cout << "Starting to compute AO" << std::endl;
-    for(int i =0;i<objects.size();i++)
+    for(unsigned int i =0;i<objects.size();i++)
     {
         Object & o = objects[i];
         Mesh mesh = o.getMesh();
