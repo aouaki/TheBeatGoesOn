@@ -67,7 +67,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
         Vec3Df IntersPointNormal2;
 
         //Area Lighting
-        float radius=0.1f;
+        float radius=0.3f;
 
         //Miroir
         if(scene->getObjects()[idObj].getRefl()>0 && activeMirror)
@@ -178,6 +178,7 @@ int RayTracer::getIntersectionPoint(const Vec3Df & camPos,
             std::vector<Triangle> tabTriangle = mesh.getTriangles();
             std::vector<Vertex> vertices = mesh.getVertices();
             std::vector<Vec3Df> normals = o.getTrianglesNormals(); //Precomputed
+            Vec3Df normal = normals[k];
             float intersectionDistance;
             float coefB[3]; //The three barycentric coefs of the intersection point
             unsigned idTriangle;

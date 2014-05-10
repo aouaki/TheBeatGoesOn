@@ -104,16 +104,16 @@ void Scene::buildDefaultScene () {
     groundMesh.loadOFF ("models/ground.off");
     Material groundMat;
     Object ground (groundMesh, groundMat);
-    ground.setRefl(0.4);
+    ground.setRefl(1.f);
     objects.push_back (ground);
 
-    Mesh wallMesh;
+   /* Mesh wallMesh;
     wallMesh.loadOFF ("models/wall.off");
     Material wallMat (1.f, 1.f, Vec3Df (0.6f, 0.4f, 0.4f));
     Object wall (wallMesh, wallMat);
     wall.setTrans (Vec3Df (-1.9f, 0.0f, 1.5f));
     //wall.setRefl(1.);
-    objects.push_back (wall);
+    objects.push_back (wall);*/
 
     /*Mesh wallMesh2;
     wallMesh2.loadOFF ("models/wall.off");

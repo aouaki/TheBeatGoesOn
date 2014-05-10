@@ -177,7 +177,7 @@ void Window::initControlWidget () {
     RayTracer * ray = RayTracer::getInstance ();
     ray->changeActMir(false);
     ray->setActShadow(false);
-    ray->setActPreAO(true);
+    ray->setActPreAO(false);
     ray->setActAA(false);
 
     layout->addWidget (optionsGroupBox);
