@@ -17,7 +17,7 @@ class Vertex {
 public:
     inline Vertex () 
         : pos (Vec3Df (0.0,0.0,0.0)), normal (Vec3Df (0.0, 0.0, 1.0)), 
-          marked (false), id (-1) {}
+          marked (false), id (-1) {occlusion = 0.;}
     inline Vertex (const Vec3Df & pos) 
         : pos (pos), normal (Vec3Df (0.0, 0.0, 1.0)), 
           marked (false), id (-1) {}
@@ -25,7 +25,7 @@ public:
         : pos (pos), normal (normal), 
           marked (false), id (-1) {}
     inline Vertex (const Vertex & v) : pos (v.pos), normal (v.normal), 
-                                       marked (v.marked), id (-1) {}
+        marked (v.marked), id (-1),occlusion(v.occlusion) {}
     inline virtual ~Vertex () {}
     inline Vertex & operator= (const Vertex & vertex) {
         pos = vertex.pos;
@@ -43,6 +43,8 @@ public:
     inline void mark () { marked = true; }
     inline void unmark () { marked = false; }
     inline void setId (int newId) { id = newId; } 
+    inline float getOcc(){return occlusion;}
+    inline void setOcc(float f){occlusion=f;}
     inline bool operator== (const Vertex & v) { return (v.pos == pos && v.normal == normal); }
     void interpolate (const Vertex & u, const Vertex & v, float alpha = 0.5);
 
@@ -57,6 +59,7 @@ private:
     Vec3Df normal;
     bool marked;
     int id;
+    float occlusion;
 };
 
 extern std::ostream & operator<< (std::ostream & output, const Vertex & v);

@@ -49,7 +49,10 @@ public slots :
     void setDisplayMode (DisplayMode m);
     void setDisplayMode (int m) { setRenderingMode (static_cast<DisplayMode>(m)); }
     void setRayImage (const QImage & image);
-    
+    void setMirrorEffect(bool b);
+    void setAAEffect(bool b);
+    void setShadowEffect(bool b);
+
 protected :
     void drawCube(const Vec3Df min, const Vec3Df max);
     void init();

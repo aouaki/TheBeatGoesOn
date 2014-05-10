@@ -120,6 +120,9 @@ bool KDNode::boxTriangleIntersectionTest(const Vec3Df & A, const  Vec3Df & B, co
     min=std::min(v1[2],std::min(v2[2],v3[2]));
     max=std::max(v1[2],std::max(v2[2],v3[2]));
     if(min>length/2 || max<-length/2) return false;
+    Vec3Df e0 = v2 - v1;
+    Vec3Df e1 = v3 - v2;
+    Vec3Df normal = Vec3Df::crossProduct(e0,e1);
     normal.normalize();
     std::vector<Vec3Df> points = box.getPoints();
     float k=0;

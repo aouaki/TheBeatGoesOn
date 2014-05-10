@@ -39,8 +39,21 @@ public:
                    unsigned int screenWidth,
                    unsigned int screenHeight);
 
-    int getIntersectionPoint(const Vec3Df & camPos, const Vec3Df & dir, Vec3Df & intersectionPoint, Vec3Df & IntersPointNormal);
-    Vec3Df Brdf(const Vec3Df & camPos,const Vec3Df & normal,int idObj,const Vec3Df & intersectionPoint);
+    int getIntersectionPoint(const Vec3Df & camPos, const Vec3Df & dir, Vec3Df & intersectionPoint, Vec3Df & IntersPointNormal, float &occlusion);
+
+    Vec3Df Brdf(const Vec3Df & camPos,const Vec3Df & normal,int idObj,const Vec3Df & intersectionPoint, float occlusion);
+    inline void setNbRayShadow(int nbrs){nbRayShadow =nbrs;}
+    inline void setNbRayAO(int nbrs){nbRayAO =nbrs;}
+    inline bool getActMir(){return activeMirror;}
+    inline void changeActMir(bool b){activeMirror=b;}
+    inline void setActShadow(bool b){activeShadow =b;}
+    inline bool getActShadow(){return activeShadow;}
+    inline void setActAO(bool b){activeAO =b;}
+    inline bool getActAO(){return activeAO;}
+    inline void setActPreAO(bool b){activePreAO =b;}
+    inline bool getActPreAO(){return activePreAO;}
+    inline void setActAA(bool b){activeAA =b;}
+    inline bool getActAA(){return activeAA;}
 
 protected:
     inline RayTracer () {}
@@ -48,6 +61,13 @@ protected:
     
 private:
     Vec3Df backgroundColor;
+    int nbRayShadow;
+    bool activeMirror;
+    bool activeShadow;
+    bool activePreAO;
+    bool activeAO;
+    bool activeAA;
+    int nbRayAO;
 };
 
 

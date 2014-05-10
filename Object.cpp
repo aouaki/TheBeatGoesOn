@@ -19,3 +19,16 @@ void Object::updateBoundingBox () {
             bbox.extendTo (V[i].getPos ());
     }
 }
+
+void Object::resize(float coef)
+{
+    vector<Vertex> & V = mesh.getVertices ();
+
+    int size = V.size();
+
+    for(int i =0;i<size;i++)
+    {
+        Vec3Df newV = V[i].getPos()/coef;
+        V[i].setPos(newV);
+    }
+}

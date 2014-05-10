@@ -32,9 +32,10 @@ inline int clamp (float f, int inf, int sup) {
 }
 
 Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
-                        const Vec3Df & normal,
-                        int idObj,
-                        const Vec3Df & intersectionPoint){
+                       const Vec3Df & normal,
+                       int idObj,
+                       const Vec3Df & intersectionPoint,
+                       float occlusion){
 
     Scene * scene = Scene::getInstance ();
     std::vector<Light> lights = scene->getLights();
@@ -66,67 +67,102 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
         Vec3Df IntersPointNormal2;
 
         //Area Lighting
-        int nbrayshadow=10;
         float radius=0.1f;
 
         //Miroir
-        if(idObj==0)
+        if(scene->getObjects()[idObj].getRefl()>0 && activeMirror)
         {
             Vec3Df vDir= intersectionPoint-camPos;
             vDir.normalize();
             Vec3Df planA = Vec3Df::crossProduct(n, Vec3Df::crossProduct(vDir, n));
             Vec3Df newDir = Vec3Df::dotProduct(planA, vDir)*planA - Vec3Df::dotProduct(vDir, n)*n;
-            int obj = getIntersectionPoint(intersectionPoint, newDir, intersectionPoint2, IntersPointNormal2);
+            float occ;
+            int obj = getIntersectionPoint(intersectionPoint, newDir, intersectionPoint2, IntersPointNormal2,occ);
             if(obj>-1)
             {
-                if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
+
+                if(activeShadow)
                 {
-                    Vec3Df reflectedColor = Brdf(intersectionPoint,IntersPointNormal2,obj,intersectionPoint2);
-                    ci += (reflectedColor+(((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255)/nbrayshadow;
+                    if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
+                    {
+                        ci += Brdf(intersectionPoint,IntersPointNormal2,obj,intersectionPoint2,occ)*scene->getObjects()[idObj].getRefl();
+                    }
                 }
+                else
+                    ci += Brdf(intersectionPoint,IntersPointNormal2,obj,intersectionPoint2,occ)*scene->getObjects()[idObj].getRefl();
             }
         }
 
-
-        for(int p = 0;p<nbrayshadow;p++)
+        if(scene->getObjects()[idObj].getRefl()<1.0 || true)
         {
-            float a = ((float)std::rand())/((float)RAND_MAX);
-            float b = ((float)std::rand())/((float)RAND_MAX);
-            float c = ((float)std::rand())/((float)RAND_MAX);
-
-            float sum = a+b+c;
-            a=a/sum*radius;
-            b=b/sum*radius;
-            c=c/sum*radius;
-            Vec3Df lightposbis;
-
-            lightposbis[0]=light.getPos()[0]+a;
-            lightposbis[1]=light.getPos()[1]+b;
-            lightposbis[2]=light.getPos()[2]+c;
-
-                if(getIntersectionPoint(intersectionPoint,-intersectionPoint+lightposbis,intersectionPoint2,IntersPointNormal2)==-1)
+            if(nbRayShadow>0 && activeShadow)
+                for(int p = 0;p<nbRayShadow;p++)
                 {
-                    ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;
+                    float a = ((float)std::rand())/((float)RAND_MAX)*2.-1.;
+                    float b = ((float)std::rand())/((float)RAND_MAX)*2.-1.;
+                    float c = ((float)std::rand())/((float)RAND_MAX)*2.-1.;
+
+                    float sum = a+b+c;
+                    a=a/sum*radius;
+                    b=b/sum*radius;
+                    c=c/sum*radius;
+                    Vec3Df lightposbis;
+
+                    lightposbis[0]=light.getPos()[0]+a;
+                    lightposbis[1]=light.getPos()[1]+b;
+                    lightposbis[2]=light.getPos()[2]+c;
+
+                    if(getIntersectionPoint(intersectionPoint,-intersectionPoint+lightposbis,intersectionPoint2,IntersPointNormal2)==-1)
+                    {
+                        ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbRayShadow;
+                    }
                 }
-         }
-
-
+            else if(activeShadow)
+            {
+                if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
+                {
+                    ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255;
+                }
+            }
+            else //sans ombre
+            {
+                ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255;
+            }
             //ci += (((matDiffuse * diffuse * matDiffuseColor) +( matSpecular * spec * matSpecularColor*0.5))*lightColor)*255/nbrayshadow;
+        }
 
 
 
     }
-    return ci;
+
+    //std::cout << "pixel color = " << ci*(1.-occlusion) << " (AO = " << 1.-occlusion << ")" << std::endl;
+    if(activePreAO) return ci*(1.f-occlusion);
+    else return ci;
 }
 
 //Function giving the good intersection point (if intersection) or return 0 if not
 //The function links the adress intersectionPoint, IntersectionPointNormal, obj to the actual intersection point, its normal
 //and the object it belongs to.
-
 int RayTracer::getIntersectionPoint(const Vec3Df & camPos,
                                     const Vec3Df & dir,
                                     Vec3Df & intersectionPoint,
                                     Vec3Df & IntersPointNormal)
+{
+    float adress;
+
+    return getIntersectionPoint(camPos,
+                                dir,
+                                intersectionPoint,
+                                IntersPointNormal,
+                                adress);
+
+}
+
+int RayTracer::getIntersectionPoint(const Vec3Df & camPos,
+                                    const Vec3Df & dir,
+                                    Vec3Df & intersectionPoint,
+                                    Vec3Df & IntersPointNormal,
+                                    float & occlusion)
 {
     Scene * scene = Scene::getInstance ();
     float smallestIntersectionDistance = 1000000.f;
@@ -153,17 +189,29 @@ int RayTracer::getIntersectionPoint(const Vec3Df & camPos,
 
                     Triangle triangle = tabTriangle[idTriangle];
 
-                    IntersPointNormal =
-                            vertices[triangle.getVertex(0)].getNormal()*coefB[2]
-                            +vertices[triangle.getVertex(1)].getNormal()*coefB[0]
-                            +vertices[triangle.getVertex(2)].getNormal()*coefB[1];
-                    IntersPointNormal = IntersPointNormal/(coefB[0]+coefB[1]+coefB[2]);
+                        if(o.getSmooth()) IntersPointNormal=normal;
+                        else
+                        {
+                            IntersPointNormal =
+                                    vertices[triangle.getVertex(0)].getNormal()*coefB[2]
+                                    +vertices[triangle.getVertex(1)].getNormal()*coefB[0]
+                                    +vertices[triangle.getVertex(2)].getNormal()*coefB[1];
+                            IntersPointNormal = IntersPointNormal/(coefB[0]+coefB[1]+coefB[2]);
+                        }
 
-                    intersectionPoint =
-                            vertices[triangle.getVertex(0)].getPos()*coefB[2]
-                            +vertices[triangle.getVertex(1)].getPos()*coefB[0]
-                            +vertices[triangle.getVertex(2)].getPos()*coefB[1];
-                    intersectionPoint = intersectionPoint/(coefB[0]+coefB[1]+coefB[2]);
+
+                        occlusion =
+                                o.getMesh().getVertices()[triangle.getVertex(0)].getOcc()*coefB[2]
+                                +o.getMesh().getVertices()[triangle.getVertex(1)].getOcc()*coefB[0]
+                                +o.getMesh().getVertices()[triangle.getVertex(2)].getOcc()*coefB[1];
+                        occlusion = occlusion/(coefB[0]+coefB[1]+coefB[2]);
+                        //std::cout << "occlusion = " << occlusion << std::endl;
+
+                        intersectionPoint =
+                                vertices[triangle.getVertex(0)].getPos()*coefB[2]
+                                +vertices[triangle.getVertex(1)].getPos()*coefB[0]
+                                +vertices[triangle.getVertex(2)].getPos()*coefB[1];
+                        intersectionPoint = (intersectionPoint+o.getTrans())/(coefB[0]+coefB[1]+coefB[2]);
 
                     smallestIntersectionDistance = intersectionDistance;
 
@@ -273,7 +321,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
             float tanY = tan (fieldOfView);
 
             //Nombre de découpe par dimension du pixel (Antialiasing)
-            int aliaNb = 1;
+            int aliaNb = 2;
+            if(!activeAA) aliaNb=1;
             aliaNb++;
 
             Vec3Df c (backgroundColor);
@@ -288,13 +337,14 @@ QImage RayTracer::render (const Vec3Df & camPos,
                     dir.normalize ();
                     Vec3Df intersectionPoint;
                     Vec3Df IntersPointNormal;
+                    float occlusion;
 
-                    int idObj = getIntersectionPoint(camPos,dir,intersectionPoint,IntersPointNormal);
+                    int idObj = getIntersectionPoint(camPos,dir,intersectionPoint,IntersPointNormal,occlusion);
 
                     if(idObj>=0)
                     {
 
-                        tempc += Brdf(camPos, IntersPointNormal, idObj,intersectionPoint)/std::pow(aliaNb-1,2);
+                        tempc += Brdf(camPos, IntersPointNormal, idObj,intersectionPoint,occlusion)/std::pow(aliaNb-1,2);
                         c=tempc;
 
                     }
