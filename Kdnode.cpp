@@ -10,8 +10,8 @@
 
 
 KDNode::KDNode(Object &o):o(o),
-                                 axis(0),
-                                 bbox(o.getBoundingBox()) {
+    axis(0),
+    bbox(o.getBoundingBox()) {
     const Mesh & mesh = o.getMesh();
     triangles.resize(mesh.getTriangles().size());
     for(unsigned int i = 0 ; i < mesh.getTriangles().size() ; i++)
@@ -27,16 +27,16 @@ KDNode::KDNode(Object &o, std::vector<unsigned> partition, int &axis, float &q, 
 
 inline float KDNode::findMedianSample(std::vector<unsigned> & triangles, int dim){
     std::vector<float> positions;
-//    positions.resize(triangles.size());
+    //    positions.resize(triangles.size());
     const Mesh & mesh = o.getMesh();
-    for (std::vector<unsigned>::iterator idTri = triangles.begin() ; idTri != triangles.end(); ++idTri) {
+    for (std::vector<unsigned>::iterator idTri = triangles.begin() ; idTri != triangles.end(); idTri++) {
 
         for(unsigned i = 0 ; i<3 ; i++) {
             unsigned v = mesh.getTriangles()[*idTri].getVertex(i);
             Vec3Df p = mesh.getVertices()[v].getPos();
             positions.push_back( p[dim] );
-            }
         }
+    }
 
     std::vector<float>::iterator first = positions.begin();
     std::vector<float>::iterator last = positions.end();
@@ -48,9 +48,9 @@ inline float KDNode::findMedianSample(std::vector<unsigned> & triangles, int dim
 
 void KDNode::splitTriangles(std::vector <unsigned> &leftTri, std::vector <unsigned> &rightTri, BoundingBox &leftBox, BoundingBox &rightBox){
     const Mesh & mesh = o.getMesh();
-    for(std::vector<unsigned>::iterator idTri = triangles.begin() ; idTri != triangles.end(); ++idTri) {
-        bool isInLeft = false;
-        bool isInRight = false;
+    for(std::vector<unsigned>::iterator idTri = triangles.begin() ; idTri != triangles.end(); idTri++) {
+        bool isInLeft = true;
+        bool isInRight = true;
 
         unsigned v = mesh.getTriangles()[*idTri].getVertex(0);
         const Vec3Df & vertex0 = mesh.getVertices()[v].getPos();
@@ -64,6 +64,11 @@ void KDNode::splitTriangles(std::vector <unsigned> &leftTri, std::vector <unsign
             leftTri.push_back(*idTri);
         if(isInRight)
             rightTri.push_back(*idTri);
+        if (!isInLeft && !isInRight)
+        {
+            leftTri.push_back(*idTri);
+            rightTri.push_back(*idTri);
+        }
     }
 }
 
@@ -115,12 +120,6 @@ bool KDNode::boxTriangleIntersectionTest(const Vec3Df & A, const  Vec3Df & B, co
     min=std::min(v1[2],std::min(v2[2],v3[2]));
     max=std::max(v1[2],std::max(v2[2],v3[2]));
     if(min>length/2 || max<-length/2) return false;
-
-    //projection de la box sur la normale du triangle
-    Vec3Df e0 = v2 - v1;
-    Vec3Df e1 = v3 - v2;
-    Vec3Df e2 = v1 - v3;
-    Vec3Df normal = Vec3Df::crossProduct(e0,e1);
     normal.normalize();
     std::vector<Vec3Df> points = box.getPoints();
     float k=0;
@@ -138,6 +137,6 @@ bool KDNode::boxTriangleIntersectionTest(const Vec3Df & A, const  Vec3Df & B, co
     if (k==l || k==-l)
         return false;
 
+    //si tous tests n'ont rien retourné
     return true;
-
 }
