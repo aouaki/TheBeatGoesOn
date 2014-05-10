@@ -155,6 +155,21 @@ public:
 
     }
 
+    inline std::vector<Vec3Df> getPoints() const{
+        Vec3Df x = Vec3Df(1,0,0);
+        Vec3Df y = Vec3Df(0,1,0);
+        std::vector<Vec3Df> points;
+        points.push_back(minBb);
+        points.push_back(minBb + x*getWidth());
+        points.push_back(minBb + y*getHeight());
+        points.push_back(minBb + x*getWidth() + y*getHeight());
+        points.push_back(maxBb);
+        points.push_back(maxBb - x*getWidth());
+        points.push_back(maxBb - y*getHeight());
+        points.push_back(maxBb - x*getWidth() - y*getHeight());
+        return points;
+    }
+
     bool intersectRay (const Vec3Df & origin, const Vec3Df & direction, Vec3Df & intersection) const;
 
 private:

@@ -22,7 +22,7 @@ protected:
     KDNode *leftChild, *rightChild;
 
 public:
-    static const unsigned MIN_TRIANGLES = 30;
+    static const unsigned MIN_TRIANGLES = 50;
     const BoundingBox bbox;
     KDNode(Object &o);
     KDNode(Object &o, std::vector<unsigned> partition, int &axis, float &q, BoundingBox &box);
