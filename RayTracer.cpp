@@ -103,7 +103,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
             if(PTRays < 1)
             {
 
-                int nbRayRT = 10;
+                int nbRayRT = 12;
 
                 for(int h=0; h< nbRayRT; h++)
                 {
@@ -113,7 +113,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
                     normal.getTwoOrthogonals(n1,n2);
 
 
-                    float a = -((float)std::rand())/((float)RAND_MAX);
+                    float a = ((float)std::rand())/((float)RAND_MAX);
                     float b = ((float)std::rand())/((float)RAND_MAX)*2.-1.;
                     float c = ((float)std::rand())/((float)RAND_MAX)*2.-1.;
 
