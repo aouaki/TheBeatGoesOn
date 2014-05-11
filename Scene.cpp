@@ -101,16 +101,16 @@ void Scene::buildDefaultScene () {
     groundMesh.loadOFF ("models/ground.off");
     Material groundMat;
     Object ground (groundMesh, groundMat);
-    ground.setRefl(1.f);
+    //ground.setRefl(0.6f);
     objects.push_back (ground);
 
-    /*Mesh wallMesh;
+    Mesh wallMesh;
     wallMesh.loadOFF ("models/wall.off");
-    Material wallMat (1.f, 1.f, Vec3Df (0.6f, 0.4f, 0.4f));
+    Material wallMat (1.f, 1.f, Vec3Df (0.f, 0.f, 0.f));
     Object wall (wallMesh, wallMat);
     wall.setTrans (Vec3Df (-1.9f, 0.0f, 1.5f));
-    //wall.setRefl(1.);
-    objects.push_back (wall);*/
+    wall.setRefl(1.);
+    objects.push_back (wall);
 
     /*Mesh wallMesh2;
     wallMesh2.loadOFF ("models/wall.off");
@@ -141,10 +141,10 @@ void Scene::buildDefaultScene () {
 
     Mesh ramMesh;
     ramMesh.loadOFF ("models/ram.off");
-    //ramMesh.rotate({0,0,1}, M_PI/2);
+    ramMesh.rotate({0,0,1}, -M_PI/2);
     Material ramMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
     Object ram (ramMesh, ramMat);
-    ram.setTrans (Vec3Df (1.f, 0.5f, 0.f));
+    ram.setTrans (Vec3Df (-1.f, 0.f, 0.f));
     //ram.resize(100.0);
     objects.push_back (ram);
 

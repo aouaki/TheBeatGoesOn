@@ -43,16 +43,17 @@ public:
     void computeDualEdgeMap (EdgeMapIndex & dualVMap1, EdgeMapIndex & dualVMap2);
     void markBorderEdges (EdgeMapIndex & edgeMap);
     
-    /*inline void rotate(const Vec3Df &axis, const float &angle) {
+    inline void rotate(const Vec3Df &axis, const float &angle) {
         Vec3Df normalizedAxis = axis;
         normalizedAxis.normalize();
 
-        for (Vertex & v : vertices) {
-            v.setPos(v.getPos().rotate(normalizedAxis, angle));
+
+        for (std::vector<Vertex>::iterator v = vertices.begin() ; v != vertices.end(); v++) {
+            (*v).setPos((*v).getPos().rotate(normalizedAxis, angle));
         }
 
         recomputeSmoothVertexNormals (0);
-    }*/
+    }
 
     void renderGL (bool flat) const;
     
