@@ -45,8 +45,6 @@ public:
     inline bool getActShadow(){return activeShadow;}
     inline void setActAO(bool b){activeAO =b;}
     inline bool getActAO(){return activeAO;}
-    inline void setActPreAO(bool b){activePreAO =b;}
-    inline bool getActPreAO(){return activePreAO;}
     inline void setActAA(bool b){activeAA =b;}
     inline bool getActAA(){return activeAA;}
     inline void setActPT(bool b){activePT =b;}
@@ -62,7 +60,6 @@ private:
     int nbRayShadow;
     bool activeMirror;
     bool activeShadow;
-    bool activePreAO;
     bool activeAO;
     bool activeAA;
     bool activePT;

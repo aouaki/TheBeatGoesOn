@@ -98,7 +98,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
         }
 
         //PathTracing
-        if(true)
+        if(activePT)
         {
             if(PTRays < depthPT)
             {
@@ -177,7 +177,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
     }
 
     //std::cout << "pixel color = " << ci*(1.-occlusion) << " (AO = " << 1.-occlusion << ")" << std::endl;
-    if(activePreAO) return ci*(1.f-occlusion);
+    if(activeAO) return ci*(1.f-occlusion);
     else return ci;
 }
 

@@ -49,7 +49,8 @@ public slots :
     void setMirrorEffect(bool b);
     void setAAEffect(bool b);
     void setShadowEffect(bool b);
-    void setRayTracerEffect(bool b);
+    void setPathTracerEffect(bool b);
+    void setAOEffect(bool b);
 
 protected :
     void init();
