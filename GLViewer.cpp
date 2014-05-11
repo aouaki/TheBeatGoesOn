@@ -52,10 +52,22 @@ void GLViewer::setAAEffect(bool b) {
     ray->setActAA(b);
 }
 
+void GLViewer::setAOEffect(bool b) {
+
+    RayTracer * ray = RayTracer::getInstance ();
+    ray->setActAO(b);
+}
+
 void GLViewer::setShadowEffect(bool b) {
 
     RayTracer * ray = RayTracer::getInstance ();
     ray->setActShadow(b);
+}
+
+void GLViewer::setPathTracerEffect(bool b) {
+
+    RayTracer * ray = RayTracer::getInstance ();
+    ray->setActPT(b);
 }
 
 void GLViewer::setRenderingMode (RenderingMode m) {

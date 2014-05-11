@@ -52,6 +52,8 @@ public slots :
     void setMirrorEffect(bool b);
     void setAAEffect(bool b);
     void setShadowEffect(bool b);
+    void setPathTracerEffect(bool b);
+    void setAOEffect(bool b);
 
 protected :
     void drawCube(const Vec3Df min, const Vec3Df max);

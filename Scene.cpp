@@ -46,7 +46,7 @@ void Scene::updateBoundingBox () {
 //Calcul l'ambient occlusion
 void Scene::computeAO(int nbRay, float maxDist)
 {
-    for(int i =0;i<objects.size();i++)
+    for(unsigned int i =0;i<objects.size();i++)
     {
         Object & o = objects[i];
         Mesh mesh = o.getMesh();
@@ -104,7 +104,7 @@ void Scene::buildDefaultScene () {
     ground.setRefl(1.f);
     objects.push_back (ground);
 
-   /* Mesh wallMesh;
+    /*Mesh wallMesh;
     wallMesh.loadOFF ("models/wall.off");
     Material wallMat (1.f, 1.f, Vec3Df (0.6f, 0.4f, 0.4f));
     Object wall (wallMesh, wallMat);

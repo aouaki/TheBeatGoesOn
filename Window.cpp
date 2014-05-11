@@ -65,7 +65,8 @@ Window::~Window () {
 void Window::renderRayImage () {
     RayTracer * ray = RayTracer::getInstance ();
     ray->setNbRayShadow((int)nbRayShadow->getValue()/1000);
-    ray->setNbRayAO((int)nbRayAO->getValue()/1000);
+    ray->setNbRayPT((int)nbRayPT->getValue()/1000);
+    ray->setDepthPT((int)depthPT->getValue()/1000);
     qglviewer::Camera * cam = viewer->camera ();
     RayTracer * rayTracer = RayTracer::getInstance ();
     qglviewer::Vec p = cam->position ();
@@ -164,21 +165,31 @@ void Window::initControlWidget () {
     QCheckBox * aaCheckBox = new QCheckBox ("Antialiasing", optionsGroupBox);
     connect (aaCheckBox, SIGNAL (toggled (bool)), viewer, SLOT(setAAEffect (bool)));
     optionsLayout->addWidget (aaCheckBox);
-    QCheckBox * sdCheckBox = new QCheckBox ("Activate shadows", optionsGroupBox);
+    QCheckBox * sdCheckBox = new QCheckBox ("Activate Shadows", optionsGroupBox);
     connect (sdCheckBox, SIGNAL (toggled (bool)), viewer, SLOT(setShadowEffect (bool)));
     optionsLayout->addWidget (sdCheckBox);
     nbRayShadow = new DoubleWidget(QString("AreaLighting density"), 0.0, 100.0, 0, this);
     optionsLayout->addWidget(nbRayShadow);
+    QCheckBox * ptCheckBox = new QCheckBox ("Activate PathTracing", optionsGroupBox);
+    connect (ptCheckBox, SIGNAL (toggled (bool)), viewer, SLOT(setPathTracerEffect (bool)));
+    optionsLayout->addWidget (ptCheckBox);
+    nbRayPT = new DoubleWidget(QString("Nb PathTracer rays"), 0.0, 100.0, 0, this);
+    optionsLayout->addWidget(nbRayPT);
+    depthPT = new DoubleWidget(QString("Depth PathTracer"), 1.0, 5.0, 1., this);
+    optionsLayout->addWidget(depthPT);
+    QCheckBox * aoCheckBox = new QCheckBox ("Ambient occlusion", optionsGroupBox);
+    connect (aoCheckBox, SIGNAL (toggled (bool)), viewer, SLOT(setAOEffect (bool)));
+    optionsLayout->addWidget (aoCheckBox);
 
-    nbRayAO = new DoubleWidget(QString("AO density"), 0.0, 100.0, 0, this);
-    optionsLayout->addWidget(nbRayAO);
+
 
     //On passe l'ption de base à 0
     RayTracer * ray = RayTracer::getInstance ();
     ray->changeActMir(false);
     ray->setActShadow(false);
-    ray->setActPreAO(false);
+    ray->setActAO(false);
     ray->setActAA(false);
+    ray->setActPT(false);
 
     layout->addWidget (optionsGroupBox);
 

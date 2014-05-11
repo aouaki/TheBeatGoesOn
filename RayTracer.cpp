@@ -35,7 +35,8 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
                        const Vec3Df & normal,
                        int idObj,
                        const Vec3Df & intersectionPoint,
-                       float occlusion){
+                       float occlusion,
+                       int PTRays){
 
     Scene * scene = Scene::getInstance ();
     std::vector<Light> lights = scene->getLights();
@@ -85,12 +86,49 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
                 {
                     if(getIntersectionPoint(intersectionPoint,-intersectionPoint+light.getPos(),intersectionPoint2,IntersPointNormal2)==-1)
                     {
-                        ci += Brdf(intersectionPoint,IntersPointNormal2,obj,intersectionPoint2,occ)*scene->getObjects()[idObj].getRefl();
+                        ci += Brdf(intersectionPoint,IntersPointNormal2,obj,intersectionPoint2,occ,0)*scene->getObjects()[idObj].getRefl();
                     }
                 }
                 else
-                    ci += Brdf(intersectionPoint,IntersPointNormal2,obj,intersectionPoint2,occ)*scene->getObjects()[idObj].getRefl();
+                    ci += Brdf(intersectionPoint,IntersPointNormal2,obj,intersectionPoint2,occ,0)*scene->getObjects()[idObj].getRefl();
             }
+        }
+
+        //PathTracing
+        if(activePT)
+        {
+            if(PTRays < depthPT)
+            {
+               for(int h=0; h< nbRayPT; h++)
+                {
+                    Vec3Df n1;
+                    Vec3Df n2;
+
+                    normal.getTwoOrthogonals(n1,n2);
+
+
+                    float a = ((float)std::rand())/((float)RAND_MAX);
+                    float b = ((float)std::rand())/((float)RAND_MAX)*2.-1.;
+                    float c = ((float)std::rand())/((float)RAND_MAX)*2.-1.;
+
+                    Vec3Df dir = normal*a+n1*b+n2*c;
+                    dir.normalize();
+
+                    int objPT = getIntersectionPoint(intersectionPoint,dir,intersectionPoint2,IntersPointNormal2);
+
+                    ci+=Brdf(intersectionPoint,IntersPointNormal2,objPT,intersectionPoint2,0.,PTRays+1)/nbRayPT;
+                }
+
+
+            }
+
+
+
+            //si pt<pt_max
+
+            //lancer plein de rayons
+
+            //contribution+=brdf(pt+1)
         }
 
         if(scene->getObjects()[idObj].getRefl()<1.0 || true)
@@ -135,7 +173,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
 
     }
 
-    if(activePreAO) return ci*(1.f-occlusion);
+    if(activeAO) return ci*(1.f-occlusion);
     else return ci;
 }
 
@@ -299,7 +337,7 @@ inline bool RayTracer::searchLeaf(const KDNode *node, Ray &ray, std::vector <Tri
     }
     if (found)
         return true;
-    if (!found)
+    else
         return false;
 }
 
@@ -352,7 +390,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                     if(idObj>=0)
                     {
 
-                        tempc += Brdf(camPos, IntersPointNormal, idObj,intersectionPoint,occlusion)/std::pow(aliaNb-1,2);
+                        tempc += Brdf(camPos, IntersPointNormal, idObj,intersectionPoint,occlusion,0)/std::pow(aliaNb-1,2);
                         c=tempc;
 
                     }

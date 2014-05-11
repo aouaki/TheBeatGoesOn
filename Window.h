@@ -46,6 +46,8 @@ private :
     GLViewer * viewer;
     DoubleWidget* nbRayShadow;
     DoubleWidget* nbRayAO;
+    DoubleWidget* nbRayPT;
+    DoubleWidget* depthPT;
 };
 
 #endif // WINDOW_H
