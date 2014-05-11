@@ -29,7 +29,7 @@ inline float KDNode::findMedianSample(std::vector<unsigned> & triangles, int dim
     std::vector<float> positions;
     //    positions.resize(triangles.size());
     const Mesh & mesh = o.getMesh();
-    for (std::vector<unsigned>::iterator idTri = triangles.begin() ; idTri != triangles.end(); idTri++) {
+    for (std::vector<unsigned>::iterator idTri = triangles.begin() ; idTri != triangles.end(); ++idTri) {
 
         for(unsigned i = 0 ; i<3 ; i++) {
             unsigned v = mesh.getTriangles()[*idTri].getVertex(i);
@@ -48,7 +48,7 @@ inline float KDNode::findMedianSample(std::vector<unsigned> & triangles, int dim
 
 void KDNode::splitTriangles(std::vector <unsigned> &leftTri, std::vector <unsigned> &rightTri, BoundingBox &leftBox, BoundingBox &rightBox){
     const Mesh & mesh = o.getMesh();
-    for(std::vector<unsigned>::iterator idTri = triangles.begin() ; idTri != triangles.end(); idTri++) {
+    for(std::vector<unsigned>::iterator idTri = triangles.begin() ; idTri != triangles.end(); ++idTri) {
         bool isInLeft = true;
         bool isInRight = true;
 
@@ -66,6 +66,7 @@ void KDNode::splitTriangles(std::vector <unsigned> &leftTri, std::vector <unsign
             rightTri.push_back(*idTri);
         if (!isInLeft && !isInRight)
         {
+            std::cout << "error" << std::endl;
             leftTri.push_back(*idTri);
             rightTri.push_back(*idTri);
         }
@@ -91,7 +92,7 @@ void KDNode::buildKDTree (float oldMed){
 bool KDNode::boxTriangleIntersectionTest(const Vec3Df & A, const  Vec3Df & B, const  Vec3Df & C, BoundingBox box) {
 
     //on teste si les points du tri sont dans la box
-    if(box.contains(A) || box.contains(B) || box.contains(C)){return true;}
+    if(box.contains(A) || box.contains(B) || box.contains(C)) {return true;}
 
     //on récupère infos
     Vec3Df center = box.getCenter();
@@ -125,19 +126,17 @@ bool KDNode::boxTriangleIntersectionTest(const Vec3Df & A, const  Vec3Df & B, co
     Vec3Df normal = Vec3Df::crossProduct(e0,e1);
     normal.normalize();
     std::vector<Vec3Df> points = box.getPoints();
-    float k=0;
-    float l=8;
-    for(std::vector<Vec3Df>::iterator point = points.begin() ; point != points.end(); point++) {
-        float product = Vec3Df::dotProduct(*point, normal);
-        if (product > 1)
+    int k=0;
+    float product = 0.f;
+    for(std::vector<Vec3Df>::iterator point = points.begin() ; point != points.end(); ++point) {
+        product = Vec3Df::dotProduct(A-*point, normal);
+        if (product >= 0.)
             k+=1;
-        if (product <1)
-            k=+1;
-        if (product==1)
-            l-=1;
+        else
+            k-=1;
     }
 
-    if (k==l || k==-l)
+    if (k==8 || k==-8)
         return false;
 
     //si tous tests n'ont rien retourné
