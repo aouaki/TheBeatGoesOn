@@ -21,7 +21,9 @@ int main (int argc, char **argv)
   window->setWindowTitle ("RayMini: A minimal raytracer.");
   window->show();
   raymini.connect (&raymini, SIGNAL (lastWindowClosed()), &raymini, SLOT (quit()));
-  
+  Scene * scene = Scene::getInstance ();
+
+  scene->computeAO(20,2.);
   return raymini.exec ();
 }
 

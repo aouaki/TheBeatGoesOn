@@ -18,13 +18,16 @@
 
 class Object {
 public:
-    inline Object () {}
+    inline Object () {smooth = false;}
     inline Object (const Mesh & mesh, const Material & mat) : mesh (mesh), mat (mat) {
         updateBoundingBox ();
         //We precompute the calcul of triangles normals
         mesh.computeTriangleNormals(trianglesNormals);
         //Construction of the KD-Tree
         tree = new KDNode(*this);
+        reflectance=0;
+        smooth = false;
+
     }
     virtual ~Object () {}
 
@@ -42,6 +45,14 @@ public:
 
     inline const std::vector<Vec3Df> & getTrianglesNormals () const { return trianglesNormals; }
     inline const KDNode * getTree () const { return tree;}
+
+    inline float getRefl(){return reflectance;}
+    inline void setRefl(float ref){reflectance=ref;}
+
+    inline bool getSmooth(){return smooth;}
+    inline void setSmooth(bool b){smooth = b;}
+
+    void resize(float coef);
     
 private:
     Mesh mesh;
@@ -50,6 +61,8 @@ private:
     Vec3Df trans;
     std::vector<Vec3Df> trianglesNormals;
     KDNode *tree;
+    float reflectance;
+    bool smooth; //define if brdf should interpolate the normals
 };
 
 

@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <cassert>
 #include <string>
+#include "RayTracer.h"
 
 using namespace std;
 
@@ -38,6 +39,23 @@ void GLViewer::setWireframe (bool b) {
 void GLViewer::setKd (bool b){
     kdtree = b;
     updateGL ();
+}
+void GLViewer::setMirrorEffect(bool b) {
+
+    RayTracer * ray = RayTracer::getInstance ();
+    ray->changeActMir(b);
+}
+
+void GLViewer::setAAEffect(bool b) {
+
+    RayTracer * ray = RayTracer::getInstance ();
+    ray->setActAA(b);
+}
+
+void GLViewer::setShadowEffect(bool b) {
+
+    RayTracer * ray = RayTracer::getInstance ();
+    ray->setActShadow(b);
 }
 
 void GLViewer::setRenderingMode (RenderingMode m) {
