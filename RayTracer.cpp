@@ -116,7 +116,7 @@ Vec3Df RayTracer::Brdf(const Vec3Df & camPos,
 
                     int objPT = getIntersectionPoint(intersectionPoint,dir,intersectionPoint2,IntersPointNormal2);
 
-                    ci+=Brdf(intersectionPoint,IntersPointNormal2,objPT,intersectionPoint2,0.,PTRays+1)/nbRayPT;
+                    ci+=Brdf(intersectionPoint,IntersPointNormal2,objPT,intersectionPoint2,0.,PTRays+1)/(nbRayPT*depthPT);
                 }
 
 
