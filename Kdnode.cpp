@@ -66,7 +66,6 @@ void KDNode::splitTriangles(std::vector <unsigned> &leftTri, std::vector <unsign
             rightTri.push_back(*idTri);
         if (!isInLeft && !isInRight)
         {
-            std::cout << "error" << std::endl;
             leftTri.push_back(*idTri);
             rightTri.push_back(*idTri);
         }
