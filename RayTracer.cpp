@@ -219,7 +219,7 @@ int RayTracer::getIntersectionPoint(const Vec3Df & camPos,
             float intersectionDistance;
             float coefB[3]; //The three barycentric coefs of the intersection point
             unsigned idTriangle;
-            bool hasIntersection = searchNode (o.getTree(), ray, tabTriangle, vertices, normals, intersectionDistance, idTriangle, coefB);
+            bool hasIntersection = searchNode (o.getTree(), ray, tabTriangle, vertices, normals, intersectionDistance, idTriangle, coefB, o.getTrans());
 
             if (hasIntersection) {
 
@@ -280,39 +280,39 @@ inline std::vector<KDNode *> RayTracer::order(float & rayDir, KDNode *leftChild,
     return orderedVector;
 }
 
-inline bool RayTracer::searchNode (const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> &triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
+inline bool RayTracer::searchNode (const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> &triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[], const Vec3Df &trans){
     if (node->isLeaf())
     {
-        return searchLeaf(node, ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
+        return searchLeaf(node, ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB, trans);
     }
     else
     {
-        return searchSplit(node, ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
+        return searchSplit(node, ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB, trans);
     }
 
 }
 
-inline bool RayTracer::searchSplit(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> &triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
+inline bool RayTracer::searchSplit(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> &triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[], const Vec3Df &trans){
     bool isInFirst= ray.intersect(node->getLeftChild()->bbox);
     bool isInSecond = ray.intersect(node->getRightChild()->bbox);
     if (isInFirst && isInSecond) {
         std::vector<KDNode *> ordered = order( ray.getDirection()[node->getAxis()], node->getLeftChild(), node->getRightChild());
-        bool inFirstNode = searchNode( ordered[0], ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
+        bool inFirstNode = searchNode( ordered[0], ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB, trans);
         if (inFirstNode)
             return true;
         else
-            return searchNode( ordered[1], ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
+            return searchNode( ordered[1], ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB, trans);
     }
     else if( isInFirst ) {
-        return searchNode( node->getLeftChild(), ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
+        return searchNode( node->getLeftChild(), ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB, trans);
     }
     else if( isInSecond ) {
-        return searchNode( node->getRightChild(), ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB);
+        return searchNode( node->getRightChild(), ray, meshTriangles, vertices, triangleNormals, intersectionDistance, idTriangle, coefB, trans);
     }
     return false;
 }
 
-inline bool RayTracer::searchLeaf(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> &triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[]){
+inline bool RayTracer::searchLeaf(const KDNode *node, Ray &ray, std::vector <Triangle> &meshTriangles, std::vector <Vertex> &vertices, std::vector<Vec3Df> &triangleNormals, float &intersectionDistance, unsigned &idTriangle, float coefB[], const Vec3Df &trans){
     std::vector<unsigned> triangleList = node->getTriangles();
 
     float smallest = 10e8;
@@ -325,8 +325,9 @@ inline bool RayTracer::searchLeaf(const KDNode *node, Ray &ray, std::vector <Tri
         Vec3Df normal = triangleNormals[*idTri];
         float coefBTemp[3];
         bool hasIntersection = ray.intersectTriangle(vertex1, vertex2, vertex3, normal, coefBTemp, intersectionDistance);
-
-        if (hasIntersection && intersectionDistance < smallest) {
+        Vec3Df intersectionPoint =vertex1*coefBTemp[2]+vertex2*coefBTemp[0]+vertex3*coefBTemp[1];
+        intersectionPoint = (intersectionPoint)/(coefBTemp[0]+coefBTemp[1]+coefBTemp[2]);
+        if (hasIntersection && intersectionDistance < smallest && node->bbox.contains(intersectionPoint)) {
             coefB[0]=coefBTemp[0];
             coefB[1]=coefBTemp[1];
             coefB[2]=coefBTemp[2];

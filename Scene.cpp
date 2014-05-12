@@ -101,8 +101,19 @@ void Scene::buildDefaultScene () {
     groundMesh.loadOFF ("models/ground.off");
     Material groundMat;
     Object ground (groundMesh, groundMat);
-    //ground.setRefl(0.6f);
+    ground.setRefl(0.6f);
     objects.push_back (ground);
+
+
+    Mesh wallMesh;
+    wallMesh.loadOFF ("models/ground.off");
+    wallMesh.rotate({0,1,0}, -M_PI/2);
+    wallMesh.rotate({0,0,1}, M_PI);
+    Material wallMat (1.f, 1.f, Vec3Df (1.f, 1.f, 0.f));
+    Object wall (wallMesh, wallMat);
+    wall.setTrans(Vec3Df(-1.95f, 0.f, 1.95f));
+    wall.setRefl(1.f);
+    objects.push_back (wall);
 
 //    Mesh wallMesh;
 //    wallMesh.loadOFF ("models/wall.off");
@@ -141,29 +152,28 @@ void Scene::buildDefaultScene () {
 
     Mesh ramMesh;
     ramMesh.loadOFF ("models/ram.off");
-    //ramMesh.rotate({0,0,1}, -M_PI/2);
+    ramMesh.rotate({0,0,1}, M_PI);
     Material ramMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
     Object ram (ramMesh, ramMat);
-    ram.setTrans (Vec3Df (-1.f, 0.f, 0.f));
+    ram.setTrans (Vec3Df (1.f, -1.f, 0.25f));
     //ram.resize(100.0);
     objects.push_back (ram);
 
-//    Mesh tvMesh;
-//    tvMesh.loadOFF ("models/tv.off");
-//    //tvMesh.rotate({0,0,1}, M_PI/2);
-//    Material tvMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
-//    Object tv (tvMesh, tvMat);
-//    //tv.setTrans (Vec3Df (0.f, 0.f, 0.f));
-//    //tv.resize(1.5);
-//    objects.push_back (tv);
+    Mesh bedMesh;
+    bedMesh.loadOFF ("models/bed.off");
+    //bedMesh.rotate({0,0,1}, M_PI/2);
+    Material bedMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
+    Object bed (bedMesh, bedMat);
+    bed.setTrans (Vec3Df (1.f, -1.0f, 0.f));
+    objects.push_back (bed);
 
-//    Mesh bedMesh;
-//    bedMesh.loadOFF ("models/bed.off");
-//    //bedMesh.rotate({0,0,1}, M_PI/2);
-//    Material bedMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
-//    Object bed (bedMesh, bedMat);
-//    bed.setTrans (Vec3Df (1.f, -1.0f, 0.3f));
-//    objects.push_back (bed);
+    Mesh monitorMesh;
+    monitorMesh.loadOFF ("models/tv.off");
+    //monitorMesh.rotate({0,0,1}, M_PI);
+    Material monitorMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
+    Object monitor (monitorMesh, monitorMat);
+    monitor.setTrans (Vec3Df (1.f, 1.2f, 0.f));
+    objects.push_back (monitor);
 
     /*Mesh rhinoMesh;
     rhinoMesh.loadOFF ("models/rhino.off");
@@ -178,7 +188,7 @@ void Scene::buildDefaultScene () {
     garg.setTrans (Vec3Df (-1.f, 1.0f, 0.1f));
     objects.push_back (garg);
     */
-    Light l (Vec3Df (3.0f, 3.0f, 3.0f), Vec3Df (1.0f, 1.0f, 1.0f), 1.f);
+    Light l (Vec3Df (3.0f, -1.0f, 3.0f), Vec3Df (1.0f, 1.0f, 1.0f), 1.f);
     //Light l2 (Vec3Df (3.0f, -3.0f, 3.0f), Vec3Df (1.0f, 1.0f, 1.0f), 1.0f);
     lights.push_back (l);
     //lights.push_back (l2);
