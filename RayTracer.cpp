@@ -373,7 +373,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
             aliaNb++;
 
             Vec3Df c (backgroundColor);
-            Vec3Df tempc(backgroundColor);
+            Vec3Df tempc(0.,0.,0.);
             for(int pixi=1; pixi<aliaNb; pixi++){
                 for(int pixj=1; pixj<aliaNb; pixj++){
                     Vec3Df stepX = (float (i)-0.5+float(pixi)/float(aliaNb) - screenWidth/2.f)/screenWidth * tanX * rightVector;
