@@ -14,16 +14,16 @@ using namespace std;
 
 int main (int argc, char **argv)
 {
-  QApplication raymini (argc, argv);
-  setBoubekQTStyle (raymini);
+  QApplication TheBeatGoesOn (argc, argv);
+  setBoubekQTStyle (TheBeatGoesOn);
   QApplication::setStyle (new QPlastiqueStyle);
   Window * window = new Window ();
-  window->setWindowTitle ("RayMini: A minimal raytracer.");
+  window->setWindowTitle ("The Beat Goes On : Un raytracer completement hallucinant");
   window->show();
-  raymini.connect (&raymini, SIGNAL (lastWindowClosed()), &raymini, SLOT (quit()));
+  TheBeatGoesOn.connect (&TheBeatGoesOn, SIGNAL (lastWindowClosed()), &TheBeatGoesOn, SLOT (quit()));
   Scene * scene = Scene::getInstance ();
 
   scene->computeAO(20,2.);
-  return raymini.exec ();
+  return TheBeatGoesOn.exec ();
 }
 

@@ -123,7 +123,7 @@ void Window::exportRayImage () {
 void Window::about () {
     QMessageBox::about (this, 
                         "About This Program", 
-                        "<b>RayMini</b> <br> by <i>Tamy Boubekeur</i>.");
+                        "<b>The Beat Goes On</b> <br> by <i>TBGO Team</i>. Work based on <i>Tamy Boubekeur</i>'s RayMini");
 }
 
 void Window::initControlWidget () {
