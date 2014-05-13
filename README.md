@@ -1,4 +1,4 @@
 TheBeatGoesOn
 =============
 
-3D Project for Tamy
+3D Project for INFSI350 course
